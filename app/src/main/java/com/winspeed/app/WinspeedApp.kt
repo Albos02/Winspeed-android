@@ -15,29 +15,27 @@ enum class Theme { LIGHT, DARK }
 enum class LayoutMode { TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S }
 
 @Composable
-fun WinspeedApp(locationManager: LocationManager) {
+fun WinspeedApp(locationManager: LocationManager, orientationManager: OrientationManager) {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var recording by remember { mutableStateOf(false) }
 
     val location by locationManager.locationData.collectAsState()
+    val magneticHeading by orientationManager.heading.collectAsState()
     
     var speedKnots by remember { mutableStateOf(0f) }
     var headingDegrees by remember { mutableStateOf(0f) }
 
-    LaunchedEffect(location) {
+    LaunchedEffect(location, magneticHeading) {
         val rawSpeed = (location?.speed ?: 0f) * 1.94384f
-        val rawHeading = location?.bearing ?: 0f
         
         if (rawSpeed > 0.2f) {
             speedKnots = rawSpeed
-            headingDegrees = rawHeading
+            headingDegrees = location?.bearing ?: 0f
         } else {
-            // If speed is low, wait 10 seconds before zeroing out
-            delay(10000)
-            // Re-check after delay (LaunchedEffect will be cancelled if a new location comes and rawSpeed > 0.2)
+            // Use magnetic heading when stationary
             speedKnots = 0f
-            headingDegrees = 0f
+            headingDegrees = magneticHeading
         }
     }
 

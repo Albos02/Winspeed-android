@@ -12,11 +12,13 @@ import com.winspeed.app.ui.theme.WinspeedTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var locationManager: LocationManager
+    private lateinit var orientationManager: OrientationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         locationManager = LocationManager(this)
+        orientationManager = OrientationManager(this)
 
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -39,10 +41,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             WinspeedTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    WinspeedApp(locationManager)
+                    WinspeedApp(locationManager, orientationManager)
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        orientationManager.start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        orientationManager.stop()
     }
 
     override fun onDestroy() {
