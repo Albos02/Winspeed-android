@@ -16,7 +16,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Create `SailingPoint` data classes for session recording
 - [x] Build calculation utilities (Unit conversions, VMG, Wind angles)
 - [x] Implement wind direction calculation (Manual & Tack-based estimation)
-- [ ] Write Unit Tests for all physics/calculation logic
+- [x] Write Unit Tests for all physics/calculation logic
 - **Checkpoint:** Dashboard displays real-time GPS data instead of placeholders.
 
 ## Phase 3: Recording & Persistence (Next)
@@ -44,7 +44,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | Phase | Focus | Status |
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
-| 2 | Sensors & Physics | 90% |
+| 2 | Sensors & Physics | 100% |
 | 3 | Recording & DB | 0% |
 | 4 | Export | 0% |
 | 5 | Polish | 10% |
