@@ -21,7 +21,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 
 ## Phase 3: UI Polish & Safety Improvements (Next)
 - [x] Branding: Rename "Settings" to "Winspeed" and integrate `Winspeed-AppIcon.svg`
-- [ ] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
+- [x] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
 - [ ] Safety: Implement double-click for EXIT button and reduce its size
 - [ ] Kiosk Mode: Prevent unintended touches and app exiting while recording
 - [ ] Data Clarity: Replace "Wind" with TWA and display Wind Direction in top-left corner
@@ -56,7 +56,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
-| 3 | UI Polish & Safety | 12% |
+| 3 | UI Polish & Safety | 25% |
 | 4 | Recording & DB | 0% |
 | 5 | Export | 0% |
 | 6 | Polish | 10% |

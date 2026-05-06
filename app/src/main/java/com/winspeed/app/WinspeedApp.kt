@@ -16,14 +16,31 @@ enum class LayoutMode { TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S }
 enum class WindMode { MANUAL, AUTO_TACK }
 
 @Composable
-fun WinspeedApp(locationManager: LocationManager, orientationManager: OrientationManager) {
+fun WinspeedApp(
+    locationManager: LocationManager,
+    orientationManager: OrientationManager,
+    settingsDataStore: SettingsDataStore
+) {
+    val coroutineScope = rememberCoroutineScope()
+    
+    val savedTheme by settingsDataStore.themeFlow.collectAsState(initial = Theme.LIGHT)
+    val savedLayout by settingsDataStore.layoutModeFlow.collectAsState(initial = LayoutMode.TWO_S)
+    val savedWindMode by settingsDataStore.windModeFlow.collectAsState(initial = WindMode.MANUAL)
+    val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
+
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
+    var manualWindDirection by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(savedTheme) { theme = savedTheme }
+    LaunchedEffect(savedLayout) { layout = savedLayout }
+    LaunchedEffect(savedWindMode) { windMode = savedWindMode }
+    LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
+
     var recording by remember { mutableStateOf(false) }
     
     val windEstimator = remember { WindEstimator() }
-    var manualWindDirection by remember { mutableStateOf(0f) }
 
     val location by locationManager.locationData.collectAsState()
     val magneticHeadingRaw by orientationManager.heading.collectAsState()
@@ -74,10 +91,22 @@ fun WinspeedApp(locationManager: LocationManager, orientationManager: Orientatio
                 windDirection = manualWindDirection,
                 windMode = windMode,
                 textColor = textColor,
-                onThemeChange = { theme = it },
-                onLayoutChange = { layout = it },
-                onWindChange = { manualWindDirection = it },
-                onWindModeChange = { windMode = it },
+                onThemeChange = { 
+                    theme = it
+                    coroutineScope.launch { settingsDataStore.saveTheme(it) }
+                },
+                onLayoutChange = { 
+                    layout = it
+                    coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
+                },
+                onWindChange = { 
+                    manualWindDirection = it
+                    coroutineScope.launch { settingsDataStore.saveManualWindDirection(it) }
+                },
+                onWindModeChange = { 
+                    windMode = it
+                    coroutineScope.launch { settingsDataStore.saveWindMode(it) }
+                },
                 onStart = { recording = true }
             )
         } else {
