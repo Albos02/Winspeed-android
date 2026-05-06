@@ -19,18 +19,18 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Write Unit Tests for all physics/calculation logic
 - **Checkpoint:** Dashboard displays real-time GPS data instead of placeholders.
 
-## Phase 3: UI Polish & Safety Improvements (Next)
+## Phase 3: UI Polish & Safety Improvements (Completed)
 - [x] Branding: Rename "Settings" to "Winspeed" and integrate `Winspeed-AppIcon.svg`
 - [x] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
 - [x] Safety: Implement double-click for EXIT button and reduce its size
 - [x] Kiosk Mode: Prevent unintended touches and app exiting while recording
 - [x] Data Clarity: Replace "Wind" with TWA and display Wind Direction in top-left corner
-- [ ] Refactor Labels: Change mode labels to short format (e.g., "4s-data")
-- [ ] Styling: Thinner borders, individual container borders, and smaller data labels
-- [ ] Theming: Streamline Dark/Light theme with accent color `#0082eb`
+- [x] Refactor Labels: Change mode labels to short format (e.g., "4s-data")
+- [x] Styling: Thinner borders, individual container borders, and smaller data labels
+- [x] Theming: Streamline Dark/Light theme with accent color `#0082eb`
 - **Checkpoint:** Professional, hardened UI ready for on-water testing.
 
-## Phase 4: Recording & Persistence
+## Phase 4: Recording & Persistence (Next)
 - [ ] Implement Session Recording service (Background capability)
 - [ ] Set up Room Database or DataStore for session storage
 - [ ] Create START/STOP/PAUSE recording logic
@@ -56,7 +56,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
-| 3 | UI Polish & Safety | 62% |
+| 3 | UI Polish & Safety | 100% |
 | 4 | Recording & DB | 0% |
 | 5 | Export | 0% |
 | 6 | Polish | 10% |

@@ -17,8 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.winspeed.app.ui.theme.WinspeedTheme
+
 enum class Theme { LIGHT, DARK }
-enum class LayoutMode { TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S }
+enum class LayoutMode { 
+    TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S;
+    
+    val shortName: String
+        get() = when (this) {
+            TWO_S -> "2s"
+            FOUR_Q -> "4q"
+            FOUR_S -> "4s"
+            SIX_Q -> "6q"
+            SIX_S -> "6s"
+        }
+}
 enum class WindMode { MANUAL, AUTO_TACK }
 
 @Composable
@@ -82,54 +95,54 @@ fun WinspeedApp(
         twa = SailingMath.calculateTWA(headingDegrees, currentWind)
     }
 
-    val isDark = theme == Theme.DARK
-    val bgColor = if (isDark) Color.Black else Color.White
-    val textColor = if (isDark) Color.White else Color.Black
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = bgColor
-    ) {
-        if (!recording) {
-            SettingsScreen(
-                theme = theme,
-                layout = layout,
-                windDirection = manualWindDirection,
-                windMode = windMode,
-                textColor = textColor,
-                onThemeChange = { 
-                    theme = it
-                    coroutineScope.launch { settingsDataStore.saveTheme(it) }
-                },
-                onLayoutChange = { 
-                    layout = it
-                    coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
-                },
-                onWindChange = { 
-                    manualWindDirection = it
-                    coroutineScope.launch { settingsDataStore.saveManualWindDirection(it) }
-                },
-                onWindModeChange = { 
-                    windMode = it
-                    coroutineScope.launch { settingsDataStore.saveWindMode(it) }
-                },
-                onStart = { recording = true }
-            )
-        } else {
-            val currentWind = when (windMode) {
-                WindMode.MANUAL -> manualWindDirection
-                WindMode.AUTO_TACK -> windEstimator.estimatedWindDirection
+    WinspeedTheme(darkTheme = theme == Theme.DARK) {
+        val textColor = if (theme == Theme.DARK) Color.White else Color.Black
+        
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            if (!recording) {
+                SettingsScreen(
+                    theme = theme,
+                    layout = layout,
+                    windDirection = manualWindDirection,
+                    windMode = windMode,
+                    textColor = textColor,
+                    onThemeChange = { 
+                        theme = it
+                        coroutineScope.launch { settingsDataStore.saveTheme(it) }
+                    },
+                    onLayoutChange = { 
+                        layout = it
+                        coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
+                    },
+                    onWindChange = { 
+                        manualWindDirection = it
+                        coroutineScope.launch { settingsDataStore.saveManualWindDirection(it) }
+                    },
+                    onWindModeChange = { 
+                        windMode = it
+                        coroutineScope.launch { settingsDataStore.saveWindMode(it) }
+                    },
+                    onStart = { recording = true }
+                )
+            } else {
+                val currentWind = when (windMode) {
+                    WindMode.MANUAL -> manualWindDirection
+                    WindMode.AUTO_TACK -> windEstimator.estimatedWindDirection
+                }
+                DashboardScreen(
+                    layout = layout,
+                    speed = speedKnots,
+                    heading = headingDegrees,
+                    vmg = vmg,
+                    windDirection = currentWind,
+                    bgColor = MaterialTheme.colorScheme.background,
+                    textColor = textColor,
+                    onExit = { recording = false }
+                )
             }
-            DashboardScreen(
-                layout = layout,
-                speed = speedKnots,
-                heading = headingDegrees,
-                vmg = vmg,
-                windDirection = currentWind,
-                bgColor = bgColor,
-                textColor = textColor,
-                onExit = { recording = false }
-            )
         }
     }
 }
@@ -185,7 +198,7 @@ fun SettingsScreen(
             },
             modifier = Modifier.padding(8.dp)
         ) {
-            Text("Layout: ${layout.name}-data")
+            Text("Layout: ${layout.shortName}-data")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -286,7 +299,7 @@ fun DashboardScreen(
         LayoutMode.SIX_S -> 90.sp
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().padding(2.dp)) {
         Column(modifier = Modifier.fillMaxSize()) {
             for (i in 0 until rows) {
                 Row(modifier = Modifier.weight(1f)) {
@@ -298,10 +311,10 @@ fun DashboardScreen(
                                 value = data[index].second,
                                 textColor = textColor,
                                 valueFontSize = valueFontSize,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f).padding(2.dp)
                             )
                         } else {
-                            Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.weight(1f).padding(2.dp))
                         }
                     }
                 }
@@ -336,7 +349,7 @@ fun DashboardScreen(
         Button(
             onClick = {
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - lastExitClickTime < 1000) {
+                if (currentTime - lastExitClickTime < 250) {
                     onExit()
                 } else {
                     lastExitClickTime = currentTime
@@ -348,14 +361,14 @@ fun DashboardScreen(
                 .size(width = 80.dp, height = 40.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 1000) 
+                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 250) 
                     Color.Red 
                 else 
                     MaterialTheme.colorScheme.primary
             )
         ) {
             Text(
-                if (System.currentTimeMillis() - lastExitClickTime < 1000) "CONFIRM" else "EXIT",
+                if (System.currentTimeMillis() - lastExitClickTime < 250) "CONFIRM" else "EXIT",
                 fontSize = 12.sp
             )
         }
@@ -372,20 +385,20 @@ fun DataCell(
 ) {
     Surface(
         modifier = modifier,
-        color = textColor.copy(alpha = 0.1f),
-        border = androidx.compose.foundation.BorderStroke(2.dp, textColor)
+        color = textColor.copy(alpha = 0.05f),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, textColor.copy(alpha = 0.5f))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(4.dp),
+                .padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = label.uppercase(),
-                fontSize = 28.sp,
-                color = textColor
+                fontSize = 16.sp,
+                color = textColor.copy(alpha = 0.7f)
             )
             Text(
                 text = value,

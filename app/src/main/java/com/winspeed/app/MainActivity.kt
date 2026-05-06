@@ -41,11 +41,7 @@ class MainActivity : ComponentActivity() {
         ))
 
         setContent {
-            WinspeedTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    WinspeedApp(locationManager, orientationManager, settingsDataStore)
-                }
-            }
+            WinspeedApp(locationManager, orientationManager, settingsDataStore)
         }
     }
 
