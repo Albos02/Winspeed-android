@@ -24,7 +24,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
 - [x] Safety: Implement double-click for EXIT button and reduce its size
 - [x] Kiosk Mode: Prevent unintended touches and app exiting while recording
-- [ ] Data Clarity: Replace "Wind" with TWA and display Wind Direction in top-left corner
+- [x] Data Clarity: Replace "Wind" with TWA and display Wind Direction in top-left corner
 - [ ] Refactor Labels: Change mode labels to short format (e.g., "4s-data")
 - [ ] Styling: Thinner borders, individual container borders, and smaller data labels
 - [ ] Theming: Streamline Dark/Light theme with accent color `#0082eb`
@@ -56,7 +56,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
-| 3 | UI Polish & Safety | 50% |
+| 3 | UI Polish & Safety | 62% |
 | 4 | Recording & DB | 0% |
 | 5 | Export | 0% |
 | 6 | Polish | 10% |

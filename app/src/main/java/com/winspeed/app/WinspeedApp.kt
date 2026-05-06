@@ -247,17 +247,17 @@ fun DashboardScreen(
     val speedStr = "%.1f".format(speed)
     val headingStr = "${heading.toInt()}°"
     val vmgStr = "%.1f".format(vmg)
-    val windStr = "${windDirection.toInt()}°"
+    val twaStr = "${SailingMath.calculateTWA(heading, windDirection).toInt()}°"
 
     val data = when (layout) {
         LayoutMode.TWO_S -> listOf("Speed" to speedStr, "Heading" to headingStr)
         LayoutMode.FOUR_Q, LayoutMode.FOUR_S -> listOf(
             "Speed" to speedStr, "VMG" to vmgStr,
-            "Heading" to headingStr, "Wind" to windStr
+            "Heading" to headingStr, "TWA" to twaStr
         )
         LayoutMode.SIX_Q, LayoutMode.SIX_S -> listOf(
             "Speed" to speedStr, "VMG" to vmgStr,
-            "Heading" to headingStr, "Wind" to windStr,
+            "Heading" to headingStr, "TWA" to twaStr,
             "Tacking" to "0.0", "Polar" to "0%"
         )
     }
@@ -307,6 +307,16 @@ fun DashboardScreen(
                 }
             }
         }
+
+        // Wind Direction in top-left corner
+        Text(
+            text = "W: ${windDirection.toInt()}°",
+            fontSize = 12.sp,
+            color = textColor,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(8.dp)
+        )
 
         // Touch blocking overlay except for the EXIT button area
         Box(
