@@ -43,4 +43,24 @@ object SailingMath {
         while (diff > 180) diff -= 360
         return diff
     }
+
+    /**
+     * Fuses GPS Bearing and Magnetic Heading based on speed.
+     * @param gpsBearing Heading from GPS (Course Over Ground)
+     * @param magneticHeading Heading from Magnetic sensors
+     * @param speedKnots Current speed in knots
+     * @return Fused heading in degrees [0, 360)
+     */
+    fun fuseHeading(gpsBearing: Float, magneticHeading: Float, speedKnots: Float): Float {
+        return when {
+            speedKnots > 2.0f -> gpsBearing
+            speedKnots < 0.2f -> magneticHeading
+            else -> {
+                // Linear blend between 0.2 and 2.0 knots
+                val weight = (speedKnots - 0.2f) / (2.0f - 0.2f)
+                val delta = headingDelta(magneticHeading, gpsBearing)
+                normalizeAngle(magneticHeading + delta * weight)
+            }
+        }
+    }
 }

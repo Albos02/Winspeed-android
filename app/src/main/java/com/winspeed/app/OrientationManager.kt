@@ -16,15 +16,18 @@ class OrientationManager(context: Context) : SensorEventListener {
     private var gravity: FloatArray? = null
     private var geomagnetic: FloatArray? = null
 
+    // Low-pass filter coefficient (0.0 to 1.0, lower is smoother but slower)
+    private val alpha = 0.1f
+
     private val _heading = MutableStateFlow(0f)
     val heading: StateFlow<Float> = _heading
 
     fun start() {
         accelerometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
         magnetometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
     }
 
@@ -34,10 +37,18 @@ class OrientationManager(context: Context) : SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            gravity = event.values
+            gravity = if (gravity == null) {
+                event.values.clone()
+            } else {
+                lowPass(event.values, gravity!!)
+            }
         }
         if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
-            geomagnetic = event.values
+            geomagnetic = if (geomagnetic == null) {
+                event.values.clone()
+            } else {
+                lowPass(event.values, geomagnetic!!)
+            }
         }
 
         if (gravity != null && geomagnetic != null) {
@@ -54,6 +65,13 @@ class OrientationManager(context: Context) : SensorEventListener {
                 _heading.value = azimuth
             }
         }
+    }
+
+    private fun lowPass(input: FloatArray, output: FloatArray): FloatArray {
+        for (idx in input.indices) {
+            output[idx] = output[idx] + alpha * (input[idx] - output[idx])
+        }
+        return output
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}

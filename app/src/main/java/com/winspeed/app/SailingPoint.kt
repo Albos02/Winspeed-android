@@ -7,7 +7,9 @@ data class SailingPoint(
     val latitude: Double,
     val longitude: Double,
     val speedKnots: Float,
-    val headingDegrees: Float,
+    val headingDegrees: Float, // Fused heading used for display
+    val gpsBearing: Float? = null, // Raw course over ground from GPS
+    val magneticHeading: Float? = null, // Raw heading from sensors
     val altitude: Double = 0.0,
     
     // --- Positional Accuracy & Environment ---

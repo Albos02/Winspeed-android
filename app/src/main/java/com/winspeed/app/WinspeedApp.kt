@@ -21,22 +21,24 @@ fun WinspeedApp(locationManager: LocationManager, orientationManager: Orientatio
     var recording by remember { mutableStateOf(false) }
 
     val location by locationManager.locationData.collectAsState()
-    val magneticHeading by orientationManager.heading.collectAsState()
+    val magneticHeadingRaw by orientationManager.heading.collectAsState()
     
     var speedKnots by remember { mutableStateOf(0f) }
     var headingDegrees by remember { mutableStateOf(0f) }
+    var gpsBearingRaw by remember { mutableStateOf(0f) }
 
-    LaunchedEffect(location, magneticHeading) {
+    LaunchedEffect(location, magneticHeadingRaw) {
         val rawSpeed = (location?.speed ?: 0f) * 1.94384f
+        val gpsBearing = location?.bearing ?: headingDegrees // Keep last heading if no bearing
+
+        speedKnots = if (rawSpeed > 0.2f) rawSpeed else 0f
+        gpsBearingRaw = gpsBearing
         
-        if (rawSpeed > 0.2f) {
+        headingDegrees = SailingMath.fuseHeading(
+            gpsBearing = gpsBearing,
+            magneticHeading = magneticHeadingRaw,
             speedKnots = rawSpeed
-            headingDegrees = location?.bearing ?: 0f
-        } else {
-            // Use magnetic heading when stationary
-            speedKnots = 0f
-            headingDegrees = magneticHeading
-        }
+        )
     }
 
     val isDark = theme == Theme.DARK
