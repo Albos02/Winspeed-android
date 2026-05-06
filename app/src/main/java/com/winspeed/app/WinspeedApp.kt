@@ -63,7 +63,7 @@ fun SettingsScreen(
     ) {
         Text(
             text = "Settings",
-            fontSize = 32.sp,
+            fontSize = 48.sp,
             color = textColor
         )
 
@@ -99,7 +99,7 @@ fun SettingsScreen(
             onClick = onStart,
             modifier = Modifier.padding(8.dp)
         ) {
-            Text("START", fontSize = 24.sp)
+            Text("START", fontSize = 36.sp)
         }
     }
 }
@@ -140,6 +140,14 @@ fun DashboardScreen(
         LayoutMode.SIX_S -> 1
     }
 
+    val valueFontSize = when (layout) {
+        LayoutMode.TWO_S -> 160.sp
+        LayoutMode.FOUR_Q -> 85.sp
+        LayoutMode.FOUR_S -> 140.sp
+        LayoutMode.SIX_Q -> 80.sp
+        LayoutMode.SIX_S -> 90.sp
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             for (i in 0 until rows) {
@@ -151,6 +159,7 @@ fun DashboardScreen(
                                 label = data[index].first,
                                 value = data[index].second,
                                 textColor = textColor,
+                                valueFontSize = valueFontSize,
                                 modifier = Modifier.weight(1f)
                             )
                         } else {
@@ -177,6 +186,7 @@ fun DataCell(
     label: String,
     value: String,
     textColor: androidx.compose.ui.graphics.Color,
+    valueFontSize: androidx.compose.ui.unit.TextUnit = 80.sp,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -193,12 +203,12 @@ fun DataCell(
         ) {
             Text(
                 text = label.uppercase(),
-                fontSize = 18.sp,
+                fontSize = 28.sp,
                 color = textColor
             )
             Text(
                 text = value,
-                fontSize = 48.sp,
+                fontSize = valueFontSize,
                 color = textColor
             )
         }
