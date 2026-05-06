@@ -2,11 +2,29 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- White Swoosh -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,30 L54,78 M30,54 L78,54"
-        android:strokeWidth="4"
-        android:strokeColor="#FFFFFF"/>
+        android:pathData="M28,90 Q70,28 145,55 Q100,48 70,85 Z" />
+    <!-- Faint Swoosh -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.35"
+        android:pathData="M50,98 Q90,42 160,65 Q118,56 88,92 Z" />
+    <!-- Top Speed Line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,133 h140 v2.5 h-140 z" />
+    <!-- Accent Speed Line -->
+    <path
+        android:fillColor="#00CFFF"
+        android:fillAlpha="0.85"
+        android:pathData="M70,147 h88 v3 h-88 z" />
+    <!-- Bottom Speed Line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:pathData="M108,159 h50 v2 h-50 z" />
 </vector>
