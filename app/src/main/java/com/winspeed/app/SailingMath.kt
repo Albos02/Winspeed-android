@@ -20,9 +20,17 @@ object SailingMath {
      * @param windDirection Direction wind is coming FROM (0-360).
      */
     fun calculateVMG(boatSpeed: Float, boatHeading: Float, windDirection: Float): Float {
-        val angleToWind = abs(boatHeading - windDirection)
+        val angleToWind = abs(headingDelta(boatHeading, windDirection))
         val angleInRadians = Math.toRadians(angleToWind.toDouble())
         return (boatSpeed * cos(angleInRadians)).toFloat()
+    }
+
+    /**
+     * Calculates True Wind Angle (TWA).
+     * Returns angle in degrees [0, 180].
+     */
+    fun calculateTWA(boatHeading: Float, windDirection: Float): Float {
+        return abs(headingDelta(boatHeading, windDirection))
     }
 
     /**
