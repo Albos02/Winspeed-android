@@ -38,7 +38,8 @@ enum class WindMode { MANUAL, AUTO_TACK }
 fun WinspeedApp(
     locationManager: LocationManager,
     orientationManager: OrientationManager,
-    settingsDataStore: SettingsDataStore
+    settingsDataStore: SettingsDataStore,
+    onKioskModeChange: (Boolean) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     
@@ -58,6 +59,10 @@ fun WinspeedApp(
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
 
     var recording by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(recording) {
+        onKioskModeChange(recording)
+    }
     
     val windEstimator = remember { WindEstimator() }
 
@@ -349,7 +354,7 @@ fun DashboardScreen(
         Button(
             onClick = {
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - lastExitClickTime < 250) {
+                if (currentTime - lastExitClickTime < 200) {
                     onExit()
                 } else {
                     lastExitClickTime = currentTime
@@ -357,18 +362,18 @@ fun DashboardScreen(
             },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(4.dp)
+                .padding(8.dp)
                 .size(width = 80.dp, height = 40.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 250) 
+                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 200) 
                     Color.Red 
                 else 
                     MaterialTheme.colorScheme.primary
             )
         ) {
             Text(
-                if (System.currentTimeMillis() - lastExitClickTime < 250) "CONFIRM" else "EXIT",
+                if (System.currentTimeMillis() - lastExitClickTime < 200) "CONFIRM" else "EXIT",
                 fontSize = 12.sp
             )
         }
