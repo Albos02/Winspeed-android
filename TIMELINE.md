@@ -10,7 +10,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] **Current Milestone:** Visual prototype with functional layout switching and scaled fonts.
 
 ## Phase 2: Sensor & Data Integration (Current Focus)
-- [ ] Set up Location Services (FusedLocationProvider) for GPS speed and heading
+- [x] Set up Location Services (FusedLocationProvider) for GPS speed and heading
 - [ ] Implement Orientation Sensor listeners for device heading
 - [ ] Create `DataPoint` data classes for session recording
 - [ ] Build calculation utilities (Unit conversions, VMG, Wind angles)
@@ -42,7 +42,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | Phase | Focus | Status |
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
-| 2 | Sensors & Physics | 5% |
+| 2 | Sensors & Physics | 30% |
 | 3 | Recording & DB | 0% |
 | 4 | Export | 0% |
 | 5 | Polish | 10% |

@@ -3,6 +3,9 @@ package com.winspeed.app
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -12,10 +15,31 @@ enum class Theme { LIGHT, DARK }
 enum class LayoutMode { TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S }
 
 @Composable
-fun WinspeedApp() {
+fun WinspeedApp(locationManager: LocationManager) {
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var recording by remember { mutableStateOf(false) }
+
+    val location by locationManager.locationData.collectAsState()
+    
+    var speedKnots by remember { mutableStateOf(0f) }
+    var headingDegrees by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(location) {
+        val rawSpeed = (location?.speed ?: 0f) * 1.94384f
+        val rawHeading = location?.bearing ?: 0f
+        
+        if (rawSpeed > 0.2f) {
+            speedKnots = rawSpeed
+            headingDegrees = rawHeading
+        } else {
+            // If speed is low, wait 10 seconds before zeroing out
+            delay(10000)
+            // Re-check after delay (LaunchedEffect will be cancelled if a new location comes and rawSpeed > 0.2)
+            speedKnots = 0f
+            headingDegrees = 0f
+        }
+    }
 
     val isDark = theme == Theme.DARK
     val bgColor = if (isDark) androidx.compose.ui.graphics.Color.Black else androidx.compose.ui.graphics.Color.White
@@ -37,6 +61,8 @@ fun WinspeedApp() {
         } else {
             DashboardScreen(
                 layout = layout,
+                speed = speedKnots,
+                heading = headingDegrees,
                 bgColor = bgColor,
                 textColor = textColor,
                 onExit = { recording = false }
@@ -107,20 +133,25 @@ fun SettingsScreen(
 @Composable
 fun DashboardScreen(
     layout: LayoutMode,
+    speed: Float,
+    heading: Float,
     bgColor: androidx.compose.ui.graphics.Color,
     textColor: androidx.compose.ui.graphics.Color,
     onExit: () -> Unit
 ) {
+    val speedStr = "%.1f".format(speed)
+    val headingStr = "${heading.toInt()}°"
+
     val data = when (layout) {
-        LayoutMode.TWO_S -> listOf("Speed" to "12.5", "Heading" to "180°")
+        LayoutMode.TWO_S -> listOf("Speed" to speedStr, "Heading" to headingStr)
         LayoutMode.FOUR_Q, LayoutMode.FOUR_S -> listOf(
-            "Speed" to "12.5", "VMG" to "9.2",
-            "Heading" to "180°", "Wind" to "45°"
+            "Speed" to speedStr, "VMG" to "0.0",
+            "Heading" to headingStr, "Wind" to "0°"
         )
         LayoutMode.SIX_Q, LayoutMode.SIX_S -> listOf(
-            "Speed" to "12.5", "VMG" to "9.2",
-            "Heading" to "180°", "Wind" to "45°",
-            "Tacking" to "2.1", "Polar" to "95%"
+            "Speed" to speedStr, "VMG" to "0.0",
+            "Heading" to headingStr, "Wind" to "0°",
+            "Tacking" to "0.0", "Polar" to "0%"
         )
     }
 
