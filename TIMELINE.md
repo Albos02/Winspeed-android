@@ -20,7 +20,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - **Checkpoint:** Dashboard displays real-time GPS data instead of placeholders.
 
 ## Phase 3: UI Polish & Safety Improvements (Next)
-- [ ] Branding: Rename "Settings" to "Winspeed" and integrate `Winspeed-AppIcon.svg`
+- [x] Branding: Rename "Settings" to "Winspeed" and integrate `Winspeed-AppIcon.svg`
 - [ ] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
 - [ ] Safety: Implement double-click for EXIT button and reduce its size
 - [ ] Kiosk Mode: Prevent unintended touches and app exiting while recording
@@ -30,7 +30,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [ ] Theming: Streamline Dark/Light theme with accent color `#0082eb`
 - **Checkpoint:** Professional, hardened UI ready for on-water testing.
 
-## Phase 4: Recording & Persistence (Next)
+## Phase 4: Recording & Persistence
 - [ ] Implement Session Recording service (Background capability)
 - [ ] Set up Room Database or DataStore for session storage
 - [ ] Create START/STOP/PAUSE recording logic
@@ -44,7 +44,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [ ] Build basic "Past Sessions" list view
 - **Checkpoint:** User can record a track and export it to Strava/Google Earth.
 
-## Phase 6: Polish & Optimization
+## Phase 6: Optimization & Maintenance
 - [ ] Screen Wake Lock implementation (keep screen on while recording)
 - [ ] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
@@ -56,6 +56,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | :--- | :--- | :--- |
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
-| 3 | Recording & DB | 0% |
-| 4 | Export | 0% |
-| 5 | Polish | 10% |
+| 3 | UI Polish & Safety | 12% |
+| 4 | Recording & DB | 0% |
+| 5 | Export | 0% |
+| 6 | Polish | 10% |

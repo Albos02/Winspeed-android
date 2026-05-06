@@ -119,8 +119,10 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        WinspeedLogo(modifier = Modifier.padding(bottom = 24.dp))
+        
         Text(
-            text = "Settings",
+            text = "Winspeed",
             fontSize = 48.sp,
             color = textColor
         )
