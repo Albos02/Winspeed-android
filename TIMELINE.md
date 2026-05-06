@@ -19,6 +19,27 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [ ] Write Unit Tests for all physics/calculation logic
 - **Checkpoint:** Dashboard displays real-time GPS data instead of placeholders.
 
+## Phase 3: Recording & Persistence (Next)
+- [ ] Implement Session Recording service (Background capability)
+- [ ] Set up Room Database or DataStore for session storage
+- [ ] Create START/STOP/PAUSE recording logic
+- [ ] Add session auto-save and crash recovery
+- **Checkpoint:** App can record a sailing session and survive a process kill.
+
+## Phase 4: Export & Sharing
+- [ ] Implement GPX Export functionality (XML generation)
+- [ ] Implement JSON Export for raw sensor data
+- [ ] Add Android Share Intent to export files to other apps
+- [ ] Build basic "Past Sessions" list view
+- **Checkpoint:** User can record a track and export it to Strava/Google Earth.
+
+## Phase 5: Polish & Optimization
+- [ ] Screen Wake Lock implementation (keep screen on while recording)
+- [ ] Battery optimization for long sessions
+- [ ] Refine landscape mode UI for all 5 layout variants
+- [ ] Add multiple unit support (Knots, km/h, m/s)
+- **Checkpoint:** Production-ready release candidate.
+
 ## Summary of Progress
 | Phase | Focus | Status |
 | :--- | :--- | :--- |

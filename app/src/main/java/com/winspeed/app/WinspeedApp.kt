@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
 
 enum class Theme { LIGHT, DARK }
 enum class LayoutMode { TWO_S, FOUR_Q, FOUR_S, SIX_Q, SIX_S }
-enum class WindMode { MANUAL, AUTO_TACK }
+enum class WindMode { MANUAL, AUTO_TACK, HEADING_UP }
 
 @Composable
 fun WinspeedApp(locationManager: LocationManager, orientationManager: OrientationManager) {
@@ -53,7 +53,54 @@ fun WinspeedApp(locationManager: LocationManager, orientationManager: Orientatio
         val currentWind = when (windMode) {
             WindMode.MANUAL -> manualWindDirection
             WindMode.AUTO_TACK -> windEstimator.estimatedWindDirection
+            WindMode.HEADING_UP -> headingDegrees
         }
+        
+        vmg = SailingMath.calculateVMG(speedKnots, headingDegrees, currentWind)
+        twa = SailingMath.calculateTWA(headingDegrees, currentWind)
+    }
+
+    val isDark = theme == Theme.DARK
+    val bgColor = if (isDark) androidx.compose.ui.graphics.Color.Black else androidx.compose.ui.graphics.Color.White
+    val textColor = if (isDark) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = bgColor
+    ) {
+        if (!recording) {
+            SettingsScreen(
+                theme = theme,
+                layout = layout,
+                windDirection = manualWindDirection,
+                windMode = windMode,
+                textColor = textColor,
+                onThemeChange = { theme = it },
+                onLayoutChange = { layout = it },
+                onWindChange = { manualWindDirection = it },
+                onWindModeChange = { windMode = it },
+                onStart = { recording = true }
+            )
+        } else {
+            val currentWind = when (windMode) {
+                WindMode.MANUAL -> manualWindDirection
+                WindMode.AUTO_TACK -> windEstimator.estimatedWindDirection
+                WindMode.HEADING_UP -> headingDegrees
+            }
+            DashboardScreen(
+                layout = layout,
+                speed = speedKnots,
+                heading = headingDegrees,
+                vmg = vmg,
+                windDirection = currentWind,
+                bgColor = bgColor,
+                textColor = textColor,
+                onExit = { recording = false }
+            )
+        }
+    }
+}
+
         
         vmg = SailingMath.calculateVMG(speedKnots, headingDegrees, currentWind)
         twa = SailingMath.calculateTWA(headingDegrees, currentWind)
@@ -158,7 +205,8 @@ fun SettingsScreen(
                 onWindModeChange(
                     when (windMode) {
                         WindMode.MANUAL -> WindMode.AUTO_TACK
-                        WindMode.AUTO_TACK -> WindMode.MANUAL
+                        WindMode.AUTO_TACK -> WindMode.HEADING_UP
+                        WindMode.HEADING_UP -> WindMode.MANUAL
                     }
                 )
             },
@@ -175,8 +223,11 @@ fun SettingsScreen(
                 valueRange = 0f..359f,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
-        } else {
+        } else if (windMode == WindMode.AUTO_TACK) {
             Text("Auto (Tack) Mode Active", color = textColor)
+            Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            Text("Heading Up Mode Active", color = textColor)
             Spacer(modifier = Modifier.height(16.dp))
         }
 
