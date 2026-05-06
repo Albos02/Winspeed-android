@@ -19,21 +19,32 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Write Unit Tests for all physics/calculation logic
 - **Checkpoint:** Dashboard displays real-time GPS data instead of placeholders.
 
-## Phase 3: Recording & Persistence (Next)
+## Phase 3: UI Polish & Safety Improvements (Next)
+- [ ] Branding: Rename "Settings" to "Winspeed" and integrate `Winspeed-AppIcon.svg`
+- [ ] Persistence: Remember user settings (Theme, Layout, Wind) on app restart
+- [ ] Safety: Implement double-click for EXIT button and reduce its size
+- [ ] Kiosk Mode: Prevent unintended touches and app exiting while recording
+- [ ] Data Clarity: Replace "Wind" with TWA and display Wind Direction in top-left corner
+- [ ] Refactor Labels: Change mode labels to short format (e.g., "4s-data")
+- [ ] Styling: Thinner borders, individual container borders, and smaller data labels
+- [ ] Theming: Streamline Dark/Light theme with accent color `#0082eb`
+- **Checkpoint:** Professional, hardened UI ready for on-water testing.
+
+## Phase 4: Recording & Persistence (Next)
 - [ ] Implement Session Recording service (Background capability)
 - [ ] Set up Room Database or DataStore for session storage
 - [ ] Create START/STOP/PAUSE recording logic
 - [ ] Add session auto-save and crash recovery
 - **Checkpoint:** App can record a sailing session and survive a process kill.
 
-## Phase 4: Export & Sharing
+## Phase 5: Export & Sharing
 - [ ] Implement GPX Export functionality (XML generation)
 - [ ] Implement JSON Export for raw sensor data
 - [ ] Add Android Share Intent to export files to other apps
 - [ ] Build basic "Past Sessions" list view
 - **Checkpoint:** User can record a track and export it to Strava/Google Earth.
 
-## Phase 5: Polish & Optimization
+## Phase 6: Polish & Optimization
 - [ ] Screen Wake Lock implementation (keep screen on while recording)
 - [ ] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
