@@ -5,8 +5,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,8 +83,8 @@ fun WinspeedApp(
     }
 
     val isDark = theme == Theme.DARK
-    val bgColor = if (isDark) androidx.compose.ui.graphics.Color.Black else androidx.compose.ui.graphics.Color.White
-    val textColor = if (isDark) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black
+    val bgColor = if (isDark) Color.Black else Color.White
+    val textColor = if (isDark) Color.White else Color.Black
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -134,7 +140,7 @@ fun SettingsScreen(
     layout: LayoutMode,
     windDirection: Float,
     windMode: WindMode,
-    textColor: androidx.compose.ui.graphics.Color,
+    textColor: Color,
     onThemeChange: (Theme) -> Unit,
     onLayoutChange: (LayoutMode) -> Unit,
     onWindChange: (Float) -> Unit,
@@ -229,24 +235,29 @@ fun DashboardScreen(
     heading: Float,
     vmg: Float,
     windDirection: Float,
-    bgColor: androidx.compose.ui.graphics.Color,
-    textColor: androidx.compose.ui.graphics.Color,
+    bgColor: Color,
+    textColor: Color,
     onExit: () -> Unit
 ) {
+    BackHandler {
+        // Prevent back button from exiting recording screen
+    }
+
+    var lastExitClickTime by remember { mutableLongStateOf(0L) }
     val speedStr = "%.1f".format(speed)
     val headingStr = "${heading.toInt()}°"
     val vmgStr = "%.1f".format(vmg)
-    val windStr = "${windDirection.toInt()}°"
+    val twaStr = "${SailingMath.calculateTWA(heading, windDirection).toInt()}°"
 
     val data = when (layout) {
         LayoutMode.TWO_S -> listOf("Speed" to speedStr, "Heading" to headingStr)
         LayoutMode.FOUR_Q, LayoutMode.FOUR_S -> listOf(
             "Speed" to speedStr, "VMG" to vmgStr,
-            "Heading" to headingStr, "Wind" to windStr
+            "Heading" to headingStr, "TWA" to twaStr
         )
         LayoutMode.SIX_Q, LayoutMode.SIX_S -> listOf(
             "Speed" to speedStr, "VMG" to vmgStr,
-            "Heading" to headingStr, "Wind" to windStr,
+            "Heading" to headingStr, "TWA" to twaStr,
             "Tacking" to "0.0", "Polar" to "0%"
         )
     }
@@ -297,13 +308,56 @@ fun DashboardScreen(
             }
         }
 
+        // Wind Direction in top-left corner
+        Text(
+            text = "W: ${windDirection.toInt()}°",
+            fontSize = 12.sp,
+            color = textColor,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(8.dp)
+        )
+
+        // Touch blocking overlay except for the EXIT button area
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    // Consume all touch events
+                }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    // Do nothing
+                }
+        )
+
         Button(
-            onClick = onExit,
+            onClick = {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastExitClickTime < 1000) {
+                    onExit()
+                } else {
+                    lastExitClickTime = currentTime
+                }
+            },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(8.dp)
+                .padding(4.dp)
+                .size(width = 80.dp, height = 40.dp),
+            contentPadding = PaddingValues(0.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 1000) 
+                    Color.Red 
+                else 
+                    MaterialTheme.colorScheme.primary
+            )
         ) {
-            Text("EXIT")
+            Text(
+                if (System.currentTimeMillis() - lastExitClickTime < 1000) "CONFIRM" else "EXIT",
+                fontSize = 12.sp
+            )
         }
     }
 }
@@ -312,7 +366,7 @@ fun DashboardScreen(
 fun DataCell(
     label: String,
     value: String,
-    textColor: androidx.compose.ui.graphics.Color,
+    textColor: Color,
     valueFontSize: androidx.compose.ui.unit.TextUnit = 80.sp,
     modifier: Modifier = Modifier
 ) {
