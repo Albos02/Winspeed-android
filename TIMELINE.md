@@ -32,7 +32,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 
 ## Phase 4: Recording & Persistence (Next)
 - [x] Implement Session Recording service (Background capability)
-- [ ] Set up Room Database or DataStore for session storage
+- [x] Set up Room Database or DataStore for session storage
 - [ ] Create START/STOP/PAUSE recording logic
 - [ ] Add session auto-save and crash recovery
 - **Checkpoint:** App can record a sailing session and survive a process kill.
@@ -57,6 +57,6 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
 | 3 | UI Polish & Safety | 100% |
-| 4 | Recording & DB | 25% |
+| 4 | Recording & DB | 50% |
 | 5 | Export | 0% |
 | 6 | Polish | 10% |
