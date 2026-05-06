@@ -5,8 +5,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -233,6 +239,11 @@ fun DashboardScreen(
     textColor: androidx.compose.ui.graphics.Color,
     onExit: () -> Unit
 ) {
+    BackHandler {
+        // Prevent back button from exiting recording screen
+    }
+
+    var lastExitClickTime by remember { mutableLongStateOf(0L) }
     val speedStr = "%.1f".format(speed)
     val headingStr = "${heading.toInt()}°"
     val vmgStr = "%.1f".format(vmg)
@@ -297,13 +308,46 @@ fun DashboardScreen(
             }
         }
 
+        // Touch blocking overlay except for the EXIT button area
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    // Consume all touch events
+                }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    // Do nothing
+                }
+        )
+
         Button(
-            onClick = onExit,
+            onClick = {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastExitClickTime < 1000) {
+                    onExit()
+                } else {
+                    lastExitClickTime = currentTime
+                }
+            },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(8.dp)
+                .padding(4.dp)
+                .size(width = 80.dp, height = 40.dp),
+            contentPadding = PaddingValues(0.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (System.currentTimeMillis() - lastExitClickTime < 1000) 
+                    androidx.compose.ui.graphics.Color.Red 
+                else 
+                    MaterialTheme.colorScheme.primary
+            )
         ) {
-            Text("EXIT")
+            Text(
+                if (System.currentTimeMillis() - lastExitClickTime < 1000) "CONFIRM" else "EXIT",
+                fontSize = 12.sp
+            )
         }
     }
 }
