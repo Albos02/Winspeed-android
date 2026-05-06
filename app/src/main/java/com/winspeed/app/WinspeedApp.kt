@@ -39,7 +39,9 @@ fun WinspeedApp(
     locationManager: LocationManager,
     orientationManager: OrientationManager,
     settingsDataStore: SettingsDataStore,
-    onKioskModeChange: (Boolean) -> Unit = {}
+    onKioskModeChange: (Boolean) -> Unit = {},
+    onRecordingStart: () -> Unit = {},
+    onRecordingStop: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     
@@ -47,23 +49,24 @@ fun WinspeedApp(
     val savedLayout by settingsDataStore.layoutModeFlow.collectAsState(initial = LayoutMode.TWO_S)
     val savedWindMode by settingsDataStore.windModeFlow.collectAsState(initial = WindMode.MANUAL)
     val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
+    val savedRecording by settingsDataStore.recordingFlow.collectAsState(initial = false)
 
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
     var manualWindDirection by remember { mutableStateOf(0f) }
+    var recording by remember { mutableStateOf(false) }
 
     LaunchedEffect(savedTheme) { theme = savedTheme }
     LaunchedEffect(savedLayout) { layout = savedLayout }
     LaunchedEffect(savedWindMode) { windMode = savedWindMode }
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
+    LaunchedEffect(savedRecording) { recording = savedRecording }
 
-    var recording by remember { mutableStateOf(false) }
-    
     LaunchedEffect(recording) {
         onKioskModeChange(recording)
     }
-    
+
     val windEstimator = remember { WindEstimator() }
 
     val location by locationManager.locationData.collectAsState()
@@ -130,7 +133,11 @@ fun WinspeedApp(
                         windMode = it
                         coroutineScope.launch { settingsDataStore.saveWindMode(it) }
                     },
-                    onStart = { recording = true }
+                    onStart = { 
+                        recording = true 
+                        coroutineScope.launch { settingsDataStore.saveRecording(true) }
+                        onRecordingStart()
+                    }
                 )
             } else {
                 val currentWind = when (windMode) {
@@ -145,7 +152,11 @@ fun WinspeedApp(
                     windDirection = currentWind,
                     bgColor = MaterialTheme.colorScheme.background,
                     textColor = textColor,
-                    onExit = { recording = false }
+                    onExit = { 
+                        recording = false 
+                        coroutineScope.launch { settingsDataStore.saveRecording(false) }
+                        onRecordingStop()
+                    }
                 )
             }
         }

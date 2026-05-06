@@ -1,6 +1,7 @@
 package com.winspeed.app
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -16,25 +17,30 @@ class SettingsDataStore(private val context: Context) {
         val LAYOUT_MODE_KEY = stringPreferencesKey("layout_mode")
         val WIND_MODE_KEY = stringPreferencesKey("wind_mode")
         val MANUAL_WIND_DIRECTION_KEY = floatPreferencesKey("manual_wind_direction")
+        val RECORDING_KEY = booleanPreferencesKey("recording")
     }
 
     val themeFlow: Flow<Theme> = context.dataStore.data.map { preferences ->
         val themeName = preferences[THEME_KEY] ?: Theme.LIGHT.name
-        Theme.valueOf(themeName)
+        try { Theme.valueOf(themeName) } catch (e: Exception) { Theme.LIGHT }
     }
 
     val layoutModeFlow: Flow<LayoutMode> = context.dataStore.data.map { preferences ->
         val layoutName = preferences[LAYOUT_MODE_KEY] ?: LayoutMode.TWO_S.name
-        LayoutMode.valueOf(layoutName)
+        try { LayoutMode.valueOf(layoutName) } catch (e: Exception) { LayoutMode.TWO_S }
     }
 
     val windModeFlow: Flow<WindMode> = context.dataStore.data.map { preferences ->
         val modeName = preferences[WIND_MODE_KEY] ?: WindMode.MANUAL.name
-        WindMode.valueOf(modeName)
+        try { WindMode.valueOf(modeName) } catch (e: Exception) { WindMode.MANUAL }
     }
 
     val manualWindDirectionFlow: Flow<Float> = context.dataStore.data.map { preferences ->
         preferences[MANUAL_WIND_DIRECTION_KEY] ?: 0f
+    }
+
+    val recordingFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[RECORDING_KEY] ?: false
     }
 
     suspend fun saveTheme(theme: Theme) {
@@ -58,6 +64,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveManualWindDirection(direction: Float) {
         context.dataStore.edit { preferences ->
             preferences[MANUAL_WIND_DIRECTION_KEY] = direction
+        }
+    }
+
+    suspend fun saveRecording(recording: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[RECORDING_KEY] = recording
         }
     }
 }
