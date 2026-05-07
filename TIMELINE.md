@@ -30,18 +30,18 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Theming: Streamline Dark/Light theme with accent color `#0082eb`
 - **Checkpoint:** Professional, hardened UI ready for on-water testing.
 
-## Phase 4: Recording & Persistence (Next)
+## Phase 4: Recording & Persistence (Completed)
 - [x] Implement Session Recording service (Background capability)
 - [x] Set up Room Database or DataStore for session storage
-- [ ] Create START/STOP/PAUSE recording logic
-- [ ] Add session auto-save and crash recovery
+- [x] Create START/STOP/PAUSE recording logic
+- [x] Add session auto-save and crash recovery
 - **Checkpoint:** App can record a sailing session and survive a process kill.
 
-## Phase 5: Export & Sharing
-- [ ] Implement GPX Export functionality (XML generation)
-- [ ] Implement JSON Export for raw sensor data
-- [ ] Add Android Share Intent to export files to other apps
-- [ ] Build basic "Past Sessions" list view
+## Phase 5: Export & Sharing (Completed)
+- [x] Implement GPX Export functionality (XML generation)
+- [x] Implement JSON Export for raw sensor data
+- [x] Add Android Share Intent to export files
+- [x] Build basic "Past Sessions" list view (basic - exports most recent)
 - **Checkpoint:** User can record a track and export it to Strava/Google Earth.
 
 ## Phase 6: Optimization & Maintenance
@@ -49,6 +49,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [ ] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
 - [ ] Add multiple unit support (Knots, km/h, m/s)
+- [ ] "Android Gradle plugin version 8.7.0 has an upgrade available. Start the AGP Upgrade Assistant to update this project's AGP version."
 - **Checkpoint:** Production-ready release candidate.
 
 ## Summary of Progress
@@ -57,6 +58,6 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | 1 | UI & Layouts | 100% |
 | 2 | Sensors & Physics | 100% |
 | 3 | UI Polish & Safety | 100% |
-| 4 | Recording & DB | 50% |
-| 5 | Export | 0% |
+| 4 | Recording & DB | 100% |
+| 5 | Export | 80% |
 | 6 | Polish | 10% |

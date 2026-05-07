@@ -2,6 +2,7 @@ package com.winspeed.app
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -14,17 +15,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun WinspeedLogo(modifier: Modifier = Modifier) {
+    val logoColor = MaterialTheme.colorScheme.onBackground
     Canvas(modifier = modifier.size(200.dp)) {
         val scale = size.width / 200f
         
-        // Background Rect (normalized to 200x200)
-        // Original x=240, y=20, width=200, height=200. We'll map this to 0,0,200,200
-        drawRoundRect(
-            color = Color(0xFF111111),
-            topLeft = Offset(0f, 0f),
-            size = Size(200f * scale, 200f * scale),
-            cornerRadius = CornerRadius(44f * scale, 44f * scale)
-        )
+        // Background Rect removed to support transparency as per latest SVG style
         
         val clipPath = Path().apply {
             addRoundRect(
@@ -44,7 +39,7 @@ fun WinspeedLogo(modifier: Modifier = Modifier) {
                 quadraticTo(100f * scale, 48f * scale, 70f * scale, 85f * scale)
                 close()
             }
-            drawPath(path1, Color.White)
+            drawPath(path1, logoColor)
             
             // Swoosh 2 (M290,118 Q330,62 400,85 Q358,76 328,112 Z) -> subtract (240, 20)
             // M50,98 Q90,42 160,65 Q118,56 88,92 Z
@@ -54,12 +49,12 @@ fun WinspeedLogo(modifier: Modifier = Modifier) {
                 quadraticTo(118f * scale, 56f * scale, 88f * scale, 92f * scale)
                 close()
             }
-            drawPath(path2, Color.White.copy(alpha = 0.35f))
+            drawPath(path2, logoColor.copy(alpha = 0.35f))
             
             // Top line: (258, 153, 140, 2.5) -> subtract (240, 20)
             // (18, 133, 140, 2.5)
             drawRoundRect(
-                color = Color.White,
+                color = logoColor,
                 topLeft = Offset(18f * scale, 133f * scale),
                 size = Size(140f * scale, 2.5f * scale),
                 cornerRadius = CornerRadius(1.25f * scale, 1.25f * scale)
@@ -78,9 +73,9 @@ fun WinspeedLogo(modifier: Modifier = Modifier) {
             // Bottom line: (348, 179, 50, 2) -> subtract (240, 20)
             // (108, 159, 50, 2)
             drawRoundRect(
-                color = Color.White,
+                color = logoColor,
                 topLeft = Offset(108f * scale, 159f * scale),
-                size = Size(50f * scale, 2f * scale),
+                size = Size(50f * scale, 2.5f * scale),
                 cornerRadius = CornerRadius(1f * scale, 1f * scale),
                 alpha = 0.3f
             )

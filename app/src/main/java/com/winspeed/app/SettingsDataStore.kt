@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,8 @@ class SettingsDataStore(private val context: Context) {
         val WIND_MODE_KEY = stringPreferencesKey("wind_mode")
         val MANUAL_WIND_DIRECTION_KEY = floatPreferencesKey("manual_wind_direction")
         val RECORDING_KEY = booleanPreferencesKey("recording")
+        val PAUSED_KEY = booleanPreferencesKey("paused")
+        val SESSION_ID_KEY = longPreferencesKey("session_id")
     }
 
     val themeFlow: Flow<Theme> = context.dataStore.data.map { preferences ->
@@ -41,6 +44,14 @@ class SettingsDataStore(private val context: Context) {
 
     val recordingFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[RECORDING_KEY] ?: false
+    }
+    
+    val pausedFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PAUSED_KEY] ?: false
+    }
+    
+    val sessionIdFlow: Flow<Long?> = context.dataStore.data.map { preferences ->
+        preferences[SESSION_ID_KEY]
     }
 
     suspend fun saveTheme(theme: Theme) {
@@ -70,6 +81,22 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveRecording(recording: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[RECORDING_KEY] = recording
+        }
+    }
+    
+    suspend fun savePaused(paused: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PAUSED_KEY] = paused
+        }
+    }
+    
+    suspend fun saveSessionId(sessionId: Long?) {
+        context.dataStore.edit { preferences ->
+            if (sessionId != null) {
+                preferences[SESSION_ID_KEY] = sessionId
+            } else {
+                preferences.remove(SESSION_ID_KEY)
+            }
         }
     }
 }

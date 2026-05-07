@@ -1,5 +1,6 @@
 package com.winspeed.app
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.winspeed.app.database.entities.SailingSession
 import com.winspeed.app.ui.theme.WinspeedTheme
 
 enum class Theme { LIGHT, DARK }
@@ -33,15 +35,21 @@ enum class LayoutMode {
         }
 }
 enum class WindMode { MANUAL, AUTO_TACK }
+enum class AppScreen { SETTINGS, DASHBOARD, SESSIONS }
 
 @Composable
 fun WinspeedApp(
     locationManager: LocationManager,
     orientationManager: OrientationManager,
     settingsDataStore: SettingsDataStore,
+    sessions: List<com.winspeed.app.database.entities.SailingSession> = emptyList(),
     onKioskModeChange: (Boolean) -> Unit = {},
-    onRecordingStart: () -> Unit = {},
-    onRecordingStop: () -> Unit = {}
+onRecordingStart: () -> Unit = {},
+    onRecordingStop: (Float?) -> Unit = {},
+    onRecordingPause: () -> Unit = {},
+    onRecordingResume: () -> Unit = {},
+    onResumeSession: () -> Unit = {},
+    onExport: (Long, String, Boolean) -> Unit = { _, _, _ -> }
 ) {
     val coroutineScope = rememberCoroutineScope()
     
@@ -56,6 +64,7 @@ fun WinspeedApp(
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
     var manualWindDirection by remember { mutableStateOf(0f) }
     var recording by remember { mutableStateOf(false) }
+    var appScreen by remember { mutableStateOf(AppScreen.SETTINGS) }
 
     LaunchedEffect(savedTheme) { theme = savedTheme }
     LaunchedEffect(savedLayout) { layout = savedLayout }
@@ -111,34 +120,45 @@ fun WinspeedApp(
             color = MaterialTheme.colorScheme.background
         ) {
             if (!recording) {
-                SettingsScreen(
-                    theme = theme,
-                    layout = layout,
-                    windDirection = manualWindDirection,
-                    windMode = windMode,
-                    textColor = textColor,
-                    onThemeChange = { 
-                        theme = it
-                        coroutineScope.launch { settingsDataStore.saveTheme(it) }
-                    },
-                    onLayoutChange = { 
-                        layout = it
-                        coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
-                    },
-                    onWindChange = { 
-                        manualWindDirection = it
-                        coroutineScope.launch { settingsDataStore.saveManualWindDirection(it) }
-                    },
-                    onWindModeChange = { 
-                        windMode = it
-                        coroutineScope.launch { settingsDataStore.saveWindMode(it) }
-                    },
-                    onStart = { 
-                        recording = true 
-                        coroutineScope.launch { settingsDataStore.saveRecording(true) }
-                        onRecordingStart()
-                    }
-                )
+                when (appScreen) {
+                    AppScreen.SETTINGS -> SettingsScreen(
+                        theme = theme,
+                        layout = layout,
+                        windDirection = manualWindDirection,
+                        windMode = windMode,
+                        sessions = sessions,
+                        textColor = textColor,
+                        onThemeChange = { 
+                            theme = it
+                            coroutineScope.launch { settingsDataStore.saveTheme(it) }
+                        },
+                        onLayoutChange = { 
+                            layout = it
+                            coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
+                        },
+                        onWindChange = { 
+                            manualWindDirection = it
+                            coroutineScope.launch { settingsDataStore.saveManualWindDirection(it) }
+                        },
+                        onWindModeChange = { 
+                            windMode = it
+                            coroutineScope.launch { settingsDataStore.saveWindMode(it) }
+                        },
+                        onStart = { 
+                            recording = true 
+                            coroutineScope.launch { settingsDataStore.saveRecording(true) }
+                            onRecordingStart()
+                        },
+                        onViewSessions = { appScreen = AppScreen.SESSIONS }
+                    )
+                    AppScreen.SESSIONS -> SessionsListScreen(
+                        sessions = sessions,
+                        textColor = textColor,
+                        onBack = { appScreen = AppScreen.SETTINGS },
+                        onExport = onExport
+                    )
+                    else -> {}
+                }
             } else {
                 val currentWind = when (windMode) {
                     WindMode.MANUAL -> manualWindDirection
@@ -155,7 +175,7 @@ fun WinspeedApp(
                     onExit = { 
                         recording = false 
                         coroutineScope.launch { settingsDataStore.saveRecording(false) }
-                        onRecordingStop()
+                        onRecordingStop(currentWind)
                     }
                 )
             }
@@ -169,12 +189,14 @@ fun SettingsScreen(
     layout: LayoutMode,
     windDirection: Float,
     windMode: WindMode,
+    sessions: List<com.winspeed.app.database.entities.SailingSession>,
     textColor: Color,
     onThemeChange: (Theme) -> Unit,
     onLayoutChange: (LayoutMode) -> Unit,
     onWindChange: (Float) -> Unit,
     onWindModeChange: (WindMode) -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onViewSessions: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -183,7 +205,7 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        WinspeedLogo(modifier = Modifier.padding(bottom = 24.dp))
+        WinspeedLogo(modifier = Modifier.size(240.dp).padding(bottom = 24.dp))
         
         Text(
             text = "Winspeed",
@@ -253,6 +275,18 @@ fun SettingsScreen(
             modifier = Modifier.padding(8.dp)
         ) {
             Text("START", fontSize = 36.sp)
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val sessionCount = sessions.size
+        if (sessionCount > 0) {
+            OutlinedButton(
+                onClick = onViewSessions,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text("Sessions ($sessionCount)", fontSize = 16.sp)
+            }
         }
     }
 }
@@ -331,9 +365,9 @@ fun DashboardScreen(
                             )
                         } else {
                             Spacer(modifier = Modifier.weight(1f).padding(2.dp))
-                        }
-                    }
-                }
+}
+    }
+}
             }
         }
 

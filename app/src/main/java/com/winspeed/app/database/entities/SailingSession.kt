@@ -9,5 +9,9 @@ data class SailingSession(
     val id: Long = 0,
     val startTime: Long = System.currentTimeMillis(),
     val endTime: Long? = null,
-    val name: String? = null
+    val name: String? = null,
+    val maxSpeedKnots: Float = 0f,
+    val avgSpeedKnots: Float = 0f,
+    val pointCount: Int = 0,
+    val lastWindDirection: Float? = null
 )

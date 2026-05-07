@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.winspeed.app.database.entities.SailingPointEntity
 import com.winspeed.app.database.entities.SailingSession
 
-@Database(entities = [SailingSession::class, SailingPointEntity::class], version = 1, exportSchema = false)
+@Database(entities = [SailingSession::class, SailingPointEntity::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class WinspeedDatabase : RoomDatabase() {
 
