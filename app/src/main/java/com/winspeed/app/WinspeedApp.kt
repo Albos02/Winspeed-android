@@ -11,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -307,6 +309,9 @@ fun DashboardScreen(
     }
 
     var lastExitClickTime by remember { mutableLongStateOf(0L) }
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val speedStr = "%.1f".format(speed)
     val headingStr = "${heading.toInt()}°"
     val vmgStr = "%.1f".format(vmg)
@@ -325,28 +330,20 @@ fun DashboardScreen(
         )
     }
 
-    val rows = when (layout) {
-        LayoutMode.TWO_S -> 2
-        LayoutMode.FOUR_Q -> 2
-        LayoutMode.FOUR_S -> 4
-        LayoutMode.SIX_Q -> 3
-        LayoutMode.SIX_S -> 6
-    }
-
-    val cols = when (layout) {
-        LayoutMode.TWO_S -> 1
-        LayoutMode.FOUR_Q -> 2
-        LayoutMode.FOUR_S -> 1
-        LayoutMode.SIX_Q -> 2
-        LayoutMode.SIX_S -> 1
+    val (rows, cols) = when (layout) {
+        LayoutMode.TWO_S -> if (isLandscape) 1 to 2 else 2 to 1
+        LayoutMode.FOUR_Q -> 2 to 2
+        LayoutMode.FOUR_S -> if (isLandscape) 2 to 2 else 4 to 1
+        LayoutMode.SIX_Q -> if (isLandscape) 2 to 3 else 3 to 2
+        LayoutMode.SIX_S -> if (isLandscape) 2 to 3 else 6 to 1
     }
 
     val valueFontSize = when (layout) {
-        LayoutMode.TWO_S -> 160.sp
-        LayoutMode.FOUR_Q -> 85.sp
-        LayoutMode.FOUR_S -> 140.sp
-        LayoutMode.SIX_Q -> 80.sp
-        LayoutMode.SIX_S -> 90.sp
+        LayoutMode.TWO_S -> if (isLandscape) 120.sp else 160.sp
+        LayoutMode.FOUR_Q -> if (isLandscape) 70.sp else 85.sp
+        LayoutMode.FOUR_S -> if (isLandscape) 80.sp else 140.sp
+        LayoutMode.SIX_Q -> if (isLandscape) 60.sp else 80.sp
+        LayoutMode.SIX_S -> if (isLandscape) 70.sp else 90.sp
     }
 
     Box(modifier = Modifier.fillMaxSize().padding(2.dp)) {
