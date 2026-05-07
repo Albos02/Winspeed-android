@@ -46,6 +46,8 @@ class RecordingService : Service() {
     private var database: WinspeedDatabase? = null
     private var sailingDao: SailingDao? = null
     private var currentSessionId: Long? = null
+    private val pointBuffer = mutableListOf<SailingPointEntity>()
+    private val BUFFER_SIZE = 10
 
     override fun onCreate() {
         super.onCreate()
@@ -145,7 +147,13 @@ class RecordingService : Service() {
                         altitude = sailingPoint.altitude,
                         accuracy = sailingPoint.accuracy
                     )
-                    dao.insertPoint(entity)
+                    
+                    pointBuffer.add(entity)
+                    if (pointBuffer.size >= BUFFER_SIZE) {
+                        val toInsert = pointBuffer.toList()
+                        pointBuffer.clear()
+                        dao.insertPoints(toInsert)
+                    }
                 }
             }
         }
@@ -197,6 +205,12 @@ class RecordingService : Service() {
         
         serviceScope.launch(Dispatchers.IO) {
             if (sessionId != null && dao != null) {
+                // Flush buffer
+                if (pointBuffer.isNotEmpty()) {
+                    dao.insertPoints(pointBuffer.toList())
+                    pointBuffer.clear()
+                }
+
                 val count = dao.getPointCount(sessionId)
                 val max = dao.getMaxSpeed(sessionId) ?: 0f
                 val avg = dao.getAvgSpeed(sessionId) ?: 0f
