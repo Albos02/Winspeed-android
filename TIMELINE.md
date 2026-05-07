@@ -44,12 +44,12 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [x] Build basic "Past Sessions" list view (basic - exports most recent)
 - **Checkpoint:** User can record a track and export it to Strava/Google Earth.
 
-## Phase 6: Optimization & Maintenance
-- [ ] Screen Wake Lock implementation (keep screen on while recording)
-- [ ] Battery optimization for long sessions
-- [ ] Refine landscape mode UI for all 5 layout variants
-- [ ] Add multiple unit support (Knots, km/h, m/s)
-- [ ] "Android Gradle plugin version 8.7.0 has an upgrade available. Start the AGP Upgrade Assistant to update this project's AGP version." -> We need to update that
+## Phase 6: Optimization & Maintenance (Completed)
+- [x] Screen Wake Lock implementation (keep screen on while recording)
+- [x] Battery optimization for long sessions (Buffered DB writes, optimized sensor frequency)
+- [x] Refine landscape mode UI for all 5 layout variants
+- [x] Add multiple unit support (Knots, km/h, m/s)
+- [x] Upgrade Android Gradle Plugin from 8.7.0 to 8.7.3
 - **Checkpoint:** Production-ready release candidate.
 
 ## Summary of Progress
@@ -59,5 +59,5 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 | 2 | Sensors & Physics | 100% |
 | 3 | UI Polish & Safety | 100% |
 | 4 | Recording & DB | 100% |
-| 5 | Export | 80% |
-| 6 | Polish | 10% |
+| 5 | Export | 100% |
+| 6 | Polish | 100% |
