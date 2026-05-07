@@ -49,7 +49,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - [ ] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
 - [ ] Add multiple unit support (Knots, km/h, m/s)
-- [ ] "Android Gradle plugin version 8.7.0 has an upgrade available. Start the AGP Upgrade Assistant to update this project's AGP version."
+- [ ] "Android Gradle plugin version 8.7.0 has an upgrade available. Start the AGP Upgrade Assistant to update this project's AGP version." -> We need to update that
 - **Checkpoint:** Production-ready release candidate.
 
 ## Summary of Progress

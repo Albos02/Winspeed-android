@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -93,6 +94,12 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        lifecycleScope.launch {
+            if (settingsDataStore.recordingFlow.first()) {
+                setKeepScreenOn(true)
+            }
+        }
+
         setContent {
             val sessionList by sessions.collectAsState()
             WinspeedApp(
@@ -104,6 +111,7 @@ class MainActivity : ComponentActivity() {
                     if (enabled) enableKioskMode() else disableKioskMode()
                 },
                 onRecordingStart = {
+                    setKeepScreenOn(true)
                     val intent = Intent(this, RecordingService::class.java).apply {
                         action = RecordingService.ACTION_START
                     }
@@ -114,6 +122,7 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 onRecordingStop = { lastWind ->
+                    setKeepScreenOn(false)
                     val intent = Intent(this, RecordingService::class.java).apply {
                         action = RecordingService.ACTION_STOP
                         if (lastWind != null) {
@@ -135,6 +144,7 @@ class MainActivity : ComponentActivity() {
                     startService(intent)
                 },
                 onResumeSession = {
+                    setKeepScreenOn(true)
                     pendingResumeSessionId?.let { id ->
                         val intent = Intent(this, RecordingService::class.java).apply {
                             action = RecordingService.ACTION_RESUME_SESSION
@@ -152,6 +162,14 @@ class MainActivity : ComponentActivity() {
                     exportSession(sessionId, format, downloadOnly)
                 }
             )
+        }
+    }
+
+    private fun setKeepScreenOn(enabled: Boolean) {
+        if (enabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
     
