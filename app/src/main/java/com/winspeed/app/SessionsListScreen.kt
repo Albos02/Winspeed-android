@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun SessionsListScreen(
     sessions: List<SailingSession>,
+    speedUnit: SpeedUnit,
     textColor: Color,
     onBack: () -> Unit,
     onExport: (Long, String, Boolean) -> Unit
@@ -98,6 +99,7 @@ fun SessionsListScreen(
                     val session = sessions[index]
                     SessionCardItem(
                         session = session,
+                        speedUnit = speedUnit,
                         textColor = textColor,
                         onExportClick = { format -> exportTarget = session.id to format }
                     )
@@ -111,6 +113,7 @@ fun SessionsListScreen(
 @Composable
 private fun SessionCardItem(
     session: SailingSession,
+    speedUnit: SpeedUnit,
     textColor: Color,
     onExportClick: (String) -> Unit
 ) {
@@ -125,8 +128,15 @@ private fun SessionCardItem(
         if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
     } ?: "In progress"
 
-    val maxSpeedStr = String.format(Locale.US, "%.1f kts", session.maxSpeedKnots)
-    val avgSpeedStr = String.format(Locale.US, "%.1f kts", session.avgSpeedKnots)
+    // Convert from knots to target unit
+    val maxSpeedMs = session.maxSpeedKnots / 1.94384f
+    val avgSpeedMs = session.avgSpeedKnots / 1.94384f
+    
+    val displayMax = speedUnit.fromMs(maxSpeedMs)
+    val displayAvg = speedUnit.fromMs(avgSpeedMs)
+
+    val maxSpeedStr = String.format(Locale.US, "%.1f %s", displayMax, speedUnit.label)
+    val avgSpeedStr = String.format(Locale.US, "%.1f %s", displayAvg, speedUnit.label)
     val windStr = session.lastWindDirection?.let { "${it.toInt()}°" } ?: "--"
 
     Surface(

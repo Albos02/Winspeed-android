@@ -38,6 +38,22 @@ enum class LayoutMode {
 }
 enum class WindMode { MANUAL, AUTO_TACK }
 enum class AppScreen { SETTINGS, DASHBOARD, SESSIONS }
+enum class SpeedUnit { 
+    KNOTS, KMH, MS;
+    
+    val label: String
+        get() = when (this) {
+            KNOTS -> "kts"
+            KMH -> "km/h"
+            MS -> "m/s"
+        }
+    
+    fun fromMs(speedMs: Float): Float = when (this) {
+        KNOTS -> speedMs * 1.94384f
+        KMH -> speedMs * 3.6f
+        MS -> speedMs
+    }
+}
 
 @Composable
 fun WinspeedApp(
@@ -60,11 +76,13 @@ onRecordingStart: () -> Unit = {},
     val savedWindMode by settingsDataStore.windModeFlow.collectAsState(initial = WindMode.MANUAL)
     val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
     val savedRecording by settingsDataStore.recordingFlow.collectAsState(initial = false)
+    val savedSpeedUnit by settingsDataStore.speedUnitFlow.collectAsState(initial = SpeedUnit.KNOTS)
 
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
     var manualWindDirection by remember { mutableStateOf(0f) }
+    var speedUnit by remember { mutableStateOf(SpeedUnit.KNOTS) }
     var recording by remember { mutableStateOf(false) }
     var appScreen by remember { mutableStateOf(AppScreen.SETTINGS) }
 
@@ -73,6 +91,7 @@ onRecordingStart: () -> Unit = {},
     LaunchedEffect(savedWindMode) { windMode = savedWindMode }
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
     LaunchedEffect(savedRecording) { recording = savedRecording }
+    LaunchedEffect(savedSpeedUnit) { speedUnit = savedSpeedUnit }
 
     LaunchedEffect(recording) {
         onKioskModeChange(recording)
@@ -126,6 +145,7 @@ onRecordingStart: () -> Unit = {},
                     AppScreen.SETTINGS -> SettingsScreen(
                         theme = theme,
                         layout = layout,
+                        speedUnit = speedUnit,
                         windDirection = manualWindDirection,
                         windMode = windMode,
                         sessions = sessions,
@@ -137,6 +157,10 @@ onRecordingStart: () -> Unit = {},
                         onLayoutChange = { 
                             layout = it
                             coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
+                        },
+                        onSpeedUnitChange = {
+                            speedUnit = it
+                            coroutineScope.launch { settingsDataStore.saveSpeedUnit(it) }
                         },
                         onWindChange = { 
                             manualWindDirection = it
@@ -155,6 +179,7 @@ onRecordingStart: () -> Unit = {},
                     )
                     AppScreen.SESSIONS -> SessionsListScreen(
                         sessions = sessions,
+                        speedUnit = speedUnit,
                         textColor = textColor,
                         onBack = { appScreen = AppScreen.SETTINGS },
                         onExport = onExport
@@ -172,6 +197,7 @@ onRecordingStart: () -> Unit = {},
                     heading = headingDegrees,
                     vmg = vmg,
                     windDirection = currentWind,
+                    speedUnit = speedUnit,
                     bgColor = MaterialTheme.colorScheme.background,
                     textColor = textColor,
                     onExit = { 
@@ -189,12 +215,14 @@ onRecordingStart: () -> Unit = {},
 fun SettingsScreen(
     theme: Theme,
     layout: LayoutMode,
+    speedUnit: SpeedUnit,
     windDirection: Float,
     windMode: WindMode,
     sessions: List<com.winspeed.app.database.entities.SailingSession>,
     textColor: Color,
     onThemeChange: (Theme) -> Unit,
     onLayoutChange: (LayoutMode) -> Unit,
+    onSpeedUnitChange: (SpeedUnit) -> Unit,
     onWindChange: (Float) -> Unit,
     onWindModeChange: (WindMode) -> Unit,
     onStart: () -> Unit,
@@ -239,6 +267,21 @@ fun SettingsScreen(
             modifier = Modifier.padding(8.dp)
         ) {
             Text("Layout: ${layout.shortName}-data")
+        }
+
+        OutlinedButton(
+            onClick = {
+                onSpeedUnitChange(
+                    when (speedUnit) {
+                        SpeedUnit.KNOTS -> SpeedUnit.KMH
+                        SpeedUnit.KMH -> SpeedUnit.MS
+                        SpeedUnit.MS -> SpeedUnit.KNOTS
+                    }
+                )
+            },
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text("Unit: ${speedUnit.name}")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -296,10 +339,11 @@ fun SettingsScreen(
 @Composable
 fun DashboardScreen(
     layout: LayoutMode,
-    speed: Float,
+    speed: Float, // in knots
     heading: Float,
-    vmg: Float,
+    vmg: Float, // in knots
     windDirection: Float,
+    speedUnit: SpeedUnit,
     bgColor: Color,
     textColor: Color,
     onExit: () -> Unit
@@ -312,19 +356,27 @@ fun DashboardScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val speedStr = "%.1f".format(speed)
+    // Convert from knots to target unit
+    // speedMs = knots / 1.94384
+    val speedMs = speed / 1.94384f
+    val vmgMs = vmg / 1.94384f
+    
+    val displaySpeed = speedUnit.fromMs(speedMs)
+    val displayVmg = speedUnit.fromMs(vmgMs)
+
+    val speedStr = "%.1f".format(displaySpeed)
     val headingStr = "${heading.toInt()}°"
-    val vmgStr = "%.1f".format(vmg)
+    val vmgStr = "%.1f".format(displayVmg)
     val twaStr = "${SailingMath.calculateTWA(heading, windDirection).toInt()}°"
 
     val data = when (layout) {
-        LayoutMode.TWO_S -> listOf("Speed" to speedStr, "Heading" to headingStr)
+        LayoutMode.TWO_S -> listOf("Speed (${speedUnit.label})" to speedStr, "Heading" to headingStr)
         LayoutMode.FOUR_Q, LayoutMode.FOUR_S -> listOf(
-            "Speed" to speedStr, "VMG" to vmgStr,
+            "Speed (${speedUnit.label})" to speedStr, "VMG (${speedUnit.label})" to vmgStr,
             "Heading" to headingStr, "TWA" to twaStr
         )
         LayoutMode.SIX_Q, LayoutMode.SIX_S -> listOf(
-            "Speed" to speedStr, "VMG" to vmgStr,
+            "Speed (${speedUnit.label})" to speedStr, "VMG (${speedUnit.label})" to vmgStr,
             "Heading" to headingStr, "TWA" to twaStr,
             "Tacking" to "0.0", "Polar" to "0%"
         )

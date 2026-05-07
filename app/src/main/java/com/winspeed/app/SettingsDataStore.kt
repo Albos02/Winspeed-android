@@ -21,6 +21,7 @@ class SettingsDataStore(private val context: Context) {
         val RECORDING_KEY = booleanPreferencesKey("recording")
         val PAUSED_KEY = booleanPreferencesKey("paused")
         val SESSION_ID_KEY = longPreferencesKey("session_id")
+        val SPEED_UNIT_KEY = stringPreferencesKey("speed_unit")
     }
 
     val themeFlow: Flow<Theme> = context.dataStore.data.map { preferences ->
@@ -52,6 +53,11 @@ class SettingsDataStore(private val context: Context) {
     
     val sessionIdFlow: Flow<Long?> = context.dataStore.data.map { preferences ->
         preferences[SESSION_ID_KEY]
+    }
+
+    val speedUnitFlow: Flow<SpeedUnit> = context.dataStore.data.map { preferences ->
+        val unitName = preferences[SPEED_UNIT_KEY] ?: SpeedUnit.KNOTS.name
+        try { SpeedUnit.valueOf(unitName) } catch (e: Exception) { SpeedUnit.KNOTS }
     }
 
     suspend fun saveTheme(theme: Theme) {
@@ -97,6 +103,12 @@ class SettingsDataStore(private val context: Context) {
             } else {
                 preferences.remove(SESSION_ID_KEY)
             }
+        }
+    }
+
+    suspend fun saveSpeedUnit(unit: SpeedUnit) {
+        context.dataStore.edit { preferences ->
+            preferences[SPEED_UNIT_KEY] = unit.name
         }
     }
 }
