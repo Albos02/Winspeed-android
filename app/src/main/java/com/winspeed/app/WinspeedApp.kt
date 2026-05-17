@@ -237,23 +237,22 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        WinspeedLogo(modifier = Modifier.width(225.dp).height(185.dp))
+        WinspeedLogo(modifier = Modifier.width(225.dp).height(185.dp).offset(y = (-70).dp))
         
         Text(
             text = "Winspeed",
             fontSize = 44.sp,
-            color = textColor
+            color = textColor,
+            modifier = Modifier.offset(y = (-70).dp)
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = { onThemeChange(if (theme == Theme.LIGHT) Theme.DARK else Theme.LIGHT) },
-            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.offset(y = (-40).dp).padding(4.dp).fillMaxWidth(0.7f)
         ) {
             Text("Theme: ${theme.name}")
         }
@@ -268,7 +267,7 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.offset(y = (-40).dp).padding(4.dp).fillMaxWidth(0.7f)
         ) {
             Text("Unit: ${speedUnit.displayName}")
         }
@@ -285,7 +284,7 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.offset(y = (-40).dp).padding(4.dp).fillMaxWidth(0.7f)
         ) {
             Text("Layout: ${layout.shortName}-data")
         }
@@ -299,50 +298,46 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.offset(y = (-40).dp).padding(4.dp).fillMaxWidth(0.7f)
         ) {
             Text("Wind: ${windMode.name}")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Data Text Scale: ${"%.1f".format(dashboardTextScale)}x", color = textColor)
-        Slider(
-            value = dashboardTextScale,
-            onValueChange = onDashboardTextScaleChange,
-            valueRange = 0.5f..2.0f,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-
         if (windMode == WindMode.MANUAL) {
-            Text("Manual Wind: ${windDirection.toInt()}°", color = textColor)
+            Text("Manual Wind: ${windDirection.toInt()}°", color = textColor, fontSize = 14.sp, modifier = Modifier.offset(y = (-35).dp))
             Slider(
                 value = windDirection,
                 onValueChange = onWindChange,
                 valueRange = 0f..359f,
-                modifier = Modifier.padding(horizontal = 32.dp)
+                modifier = Modifier.padding(horizontal = 32.dp).height(32.dp).offset(y = (-35).dp)
             )
         } else {
-            Text("Auto (Tack) Mode Active", color = textColor)
-            Spacer(modifier = Modifier.height(16.dp))
+            Text("Auto (Tack) Mode Active", color = textColor, fontSize = 14.sp, modifier = Modifier.offset(y = (-35).dp))
+            Spacer(modifier = Modifier.height(8.dp).offset(y = (-35).dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Text("Data Text Scale: ${"%.1f".format(dashboardTextScale)}x", color = textColor, fontSize = 14.sp, modifier = Modifier.offset(y = (-30).dp))
+        Slider(
+            value = dashboardTextScale,
+            onValueChange = onDashboardTextScaleChange,
+            valueRange = 0.5f..2.0f,
+            modifier = Modifier.padding(horizontal = 32.dp).height(32.dp).offset(y = (-30).dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp).offset(y = (-25).dp))
 
         Button(
             onClick = onStart,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.offset(y = (-25).dp).padding(8.dp)
         ) {
             Text("START", fontSize = 36.sp)
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
         
         val sessionCount = sessions.size
         if (sessionCount > 0) {
             OutlinedButton(
                 onClick = onViewSessions,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.offset(y = (-25).dp).padding(8.dp)
             ) {
                 Text("Sessions ($sessionCount)", fontSize = 16.sp)
             }
@@ -443,9 +438,9 @@ fun DashboardScreen(
                             )
                         } else {
                             Spacer(modifier = Modifier.weight(1f).padding(2.dp))
-}
-    }
-}
+                        }
+                    }
+                }
             }
         }
 
