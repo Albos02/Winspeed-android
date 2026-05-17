@@ -14,6 +14,8 @@ class LocationManager(context: Context) {
     private val _locationData = MutableStateFlow<Location?>(null)
     val locationData: StateFlow<Location?> = _locationData
 
+    private var isStarted = false
+    
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             _locationData.value = locationResult.lastLocation
@@ -22,6 +24,8 @@ class LocationManager(context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
+        if (isStarted) return
+        
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .setMinUpdateIntervalMillis(500)
             .build()
@@ -31,9 +35,12 @@ class LocationManager(context: Context) {
             locationCallback,
             Looper.getMainLooper()
         )
+        isStarted = true
     }
 
     fun stopLocationUpdates() {
+        if (!isStarted) return
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        isStarted = false
     }
 }
