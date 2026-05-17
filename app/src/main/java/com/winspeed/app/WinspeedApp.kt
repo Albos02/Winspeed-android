@@ -35,6 +35,16 @@ enum class LayoutMode {
         }
 }
 enum class WindMode { MANUAL, AUTO_TACK }
+enum class SpeedUnit { 
+    KNOTS, KMH, MS;
+    
+    val displayName: String
+        get() = when (this) {
+            KNOTS -> "kn"
+            KMH -> "km/h"
+            MS -> "m/s"
+        }
+}
 enum class AppScreen { SETTINGS, DASHBOARD, SESSIONS }
 
 @Composable
@@ -57,12 +67,14 @@ fun WinspeedApp(
     val savedTheme by settingsDataStore.themeFlow.collectAsState(initial = Theme.LIGHT)
     val savedLayout by settingsDataStore.layoutModeFlow.collectAsState(initial = LayoutMode.TWO_S)
     val savedWindMode by settingsDataStore.windModeFlow.collectAsState(initial = WindMode.MANUAL)
+    val savedSpeedUnit by settingsDataStore.speedUnitFlow.collectAsState(initial = SpeedUnit.KNOTS)
     val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
     val savedRecording by settingsDataStore.recordingFlow.collectAsState(initial = false)
 
     var theme by remember { mutableStateOf(Theme.LIGHT) }
     var layout by remember { mutableStateOf(LayoutMode.TWO_S) }
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
+    var speedUnit by remember { mutableStateOf(SpeedUnit.KNOTS) }
     var manualWindDirection by remember { mutableStateOf(0f) }
     var recording by remember { mutableStateOf(false) }
     var appScreen by remember { mutableStateOf(AppScreen.SETTINGS) }
@@ -70,6 +82,7 @@ fun WinspeedApp(
     LaunchedEffect(savedTheme) { theme = savedTheme }
     LaunchedEffect(savedLayout) { layout = savedLayout }
     LaunchedEffect(savedWindMode) { windMode = savedWindMode }
+    LaunchedEffect(savedSpeedUnit) { speedUnit = savedSpeedUnit }
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
     LaunchedEffect(savedRecording) { recording = savedRecording }
 
@@ -126,6 +139,7 @@ fun WinspeedApp(
                     AppScreen.SETTINGS -> SettingsScreen(
                         theme = theme,
                         layout = layout,
+                        speedUnit = speedUnit,
                         windDirection = manualWindDirection,
                         windMode = windMode,
                         sessions = sessions,
@@ -137,6 +151,10 @@ fun WinspeedApp(
                         onLayoutChange = { 
                             layout = it
                             coroutineScope.launch { settingsDataStore.saveLayoutMode(it) }
+                        },
+                        onSpeedUnitChange = {
+                            speedUnit = it
+                            coroutineScope.launch { settingsDataStore.saveSpeedUnit(it) }
                         },
                         onWindChange = { 
                             manualWindDirection = it
@@ -169,6 +187,7 @@ fun WinspeedApp(
                 DashboardScreen(
                     layout = layout,
                     speed = speedKnots,
+                    speedUnit = speedUnit,
                     heading = headingDegrees,
                     vmg = vmg,
                     windDirection = currentWind,
@@ -189,12 +208,14 @@ fun WinspeedApp(
 fun SettingsScreen(
     theme: Theme,
     layout: LayoutMode,
+    speedUnit: SpeedUnit,
     windDirection: Float,
     windMode: WindMode,
     sessions: List<com.winspeed.app.database.entities.SailingSession>,
     textColor: Color,
     onThemeChange: (Theme) -> Unit,
     onLayoutChange: (LayoutMode) -> Unit,
+    onSpeedUnitChange: (SpeedUnit) -> Unit,
     onWindChange: (Float) -> Unit,
     onWindModeChange: (WindMode) -> Unit,
     onStart: () -> Unit,
@@ -219,9 +240,24 @@ fun SettingsScreen(
 
         OutlinedButton(
             onClick = { onThemeChange(if (theme == Theme.LIGHT) Theme.DARK else Theme.LIGHT) },
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
         ) {
             Text("Theme: ${theme.name}")
+        }
+
+        OutlinedButton(
+            onClick = {
+                onSpeedUnitChange(
+                    when (speedUnit) {
+                        SpeedUnit.KNOTS -> SpeedUnit.KMH
+                        SpeedUnit.KMH -> SpeedUnit.MS
+                        SpeedUnit.MS -> SpeedUnit.KNOTS
+                    }
+                )
+            },
+            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
+        ) {
+            Text("Unit: ${speedUnit.displayName}")
         }
 
         OutlinedButton(
@@ -236,7 +272,7 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
         ) {
             Text("Layout: ${layout.shortName}-data")
         }
@@ -297,6 +333,7 @@ fun SettingsScreen(
 fun DashboardScreen(
     layout: LayoutMode,
     speed: Float,
+    speedUnit: SpeedUnit,
     heading: Float,
     vmg: Float,
     windDirection: Float,
@@ -309,19 +346,35 @@ fun DashboardScreen(
     }
 
     var lastExitClickTime by remember { mutableLongStateOf(0L) }
-    val speedStr = "%.1f".format(speed)
+    
+    val convertedSpeed = when (speedUnit) {
+        SpeedUnit.KNOTS -> speed
+        SpeedUnit.KMH -> speed * 1.852f
+        SpeedUnit.MS -> speed * 0.514444f
+    }
+    
+    val convertedVmg = when (speedUnit) {
+        SpeedUnit.KNOTS -> vmg
+        SpeedUnit.KMH -> vmg * 1.852f
+        SpeedUnit.MS -> vmg * 0.514444f
+    }
+
+    val speedStr = "%.1f".format(convertedSpeed)
     val headingStr = "${heading.toInt()}°"
-    val vmgStr = "%.1f".format(vmg)
+    val vmgStr = "%.1f".format(convertedVmg)
     val twaStr = "${SailingMath.calculateTWA(heading, windDirection).toInt()}°"
 
+    val speedLabel = "Speed (${speedUnit.displayName})"
+    val vmgLabel = "VMG (${speedUnit.displayName})"
+
     val data = when (layout) {
-        LayoutMode.TWO_S -> listOf("Speed" to speedStr, "Heading" to headingStr)
+        LayoutMode.TWO_S -> listOf(speedLabel to speedStr, "Heading" to headingStr)
         LayoutMode.FOUR_Q, LayoutMode.FOUR_S -> listOf(
-            "Speed" to speedStr, "VMG" to vmgStr,
+            speedLabel to speedStr, vmgLabel to vmgStr,
             "Heading" to headingStr, "TWA" to twaStr
         )
         LayoutMode.SIX_Q, LayoutMode.SIX_S -> listOf(
-            "Speed" to speedStr, "VMG" to vmgStr,
+            speedLabel to speedStr, vmgLabel to vmgStr,
             "Heading" to headingStr, "TWA" to twaStr,
             "Tacking" to "0.0", "Polar" to "0%"
         )

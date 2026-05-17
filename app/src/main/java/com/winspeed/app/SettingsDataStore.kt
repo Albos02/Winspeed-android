@@ -17,6 +17,7 @@ class SettingsDataStore(private val context: Context) {
         val THEME_KEY = stringPreferencesKey("theme")
         val LAYOUT_MODE_KEY = stringPreferencesKey("layout_mode")
         val WIND_MODE_KEY = stringPreferencesKey("wind_mode")
+        val SPEED_UNIT_KEY = stringPreferencesKey("speed_unit")
         val MANUAL_WIND_DIRECTION_KEY = floatPreferencesKey("manual_wind_direction")
         val RECORDING_KEY = booleanPreferencesKey("recording")
         val PAUSED_KEY = booleanPreferencesKey("paused")
@@ -36,6 +37,11 @@ class SettingsDataStore(private val context: Context) {
     val windModeFlow: Flow<WindMode> = context.dataStore.data.map { preferences ->
         val modeName = preferences[WIND_MODE_KEY] ?: WindMode.MANUAL.name
         try { WindMode.valueOf(modeName) } catch (e: Exception) { WindMode.MANUAL }
+    }
+
+    val speedUnitFlow: Flow<SpeedUnit> = context.dataStore.data.map { preferences ->
+        val unitName = preferences[SPEED_UNIT_KEY] ?: SpeedUnit.KNOTS.name
+        try { SpeedUnit.valueOf(unitName) } catch (e: Exception) { SpeedUnit.KNOTS }
     }
 
     val manualWindDirectionFlow: Flow<Float> = context.dataStore.data.map { preferences ->
@@ -69,6 +75,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveWindMode(windMode: WindMode) {
         context.dataStore.edit { preferences ->
             preferences[WIND_MODE_KEY] = windMode.name
+        }
+    }
+
+    suspend fun saveSpeedUnit(speedUnit: SpeedUnit) {
+        context.dataStore.edit { preferences ->
+            preferences[SPEED_UNIT_KEY] = speedUnit.name
         }
     }
 
