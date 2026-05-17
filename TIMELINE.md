@@ -46,7 +46,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 
 ## Phase 6: Optimization & Maintenance
 - [x] Screen Wake Lock implementation (keep screen on while recording)
-- [ ] Battery optimization for long sessions
+- [x] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
 - [ ] Add multiple unit support (Knots, km/h, m/s)
 - [ ] "Android Gradle plugin version 8.7.0 has an upgrade available. Start the AGP Upgrade Assistant to update this project's AGP version."

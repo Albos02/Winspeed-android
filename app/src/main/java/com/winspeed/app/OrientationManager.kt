@@ -22,17 +22,23 @@ class OrientationManager(context: Context) : SensorEventListener {
     private val _heading = MutableStateFlow(0f)
     val heading: StateFlow<Float> = _heading
 
+    private var isStarted = false
+
     fun start() {
+        if (isStarted) return
         accelerometer?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
         magnetometer?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
+        isStarted = true
     }
 
     fun stop() {
+        if (!isStarted) return
         sensorManager.unregisterListener(this)
+        isStarted = false
     }
 
     override fun onSensorChanged(event: SensorEvent) {
