@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -224,23 +226,23 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        WinspeedLogo(modifier = Modifier.size(240.dp).padding(bottom = 24.dp))
+        WinspeedLogo(modifier = Modifier.width(225.dp).height(185.dp))
         
         Text(
             text = "Winspeed",
-            fontSize = 48.sp,
+            fontSize = 44.sp,
             color = textColor
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = { onThemeChange(if (theme == Theme.LIGHT) Theme.DARK else Theme.LIGHT) },
-            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
         ) {
             Text("Theme: ${theme.name}")
         }
@@ -255,7 +257,7 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
         ) {
             Text("Unit: ${speedUnit.displayName}")
         }
@@ -272,12 +274,10 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(8.dp).fillMaxWidth(0.7f)
+            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
         ) {
             Text("Layout: ${layout.shortName}-data")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedButton(
             onClick = {
@@ -288,9 +288,9 @@ fun SettingsScreen(
                     }
                 )
             },
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(6.dp).fillMaxWidth(0.7f)
         ) {
-            Text("Wind Mode: ${windMode.name}")
+            Text("Wind: ${windMode.name}")
         }
 
         if (windMode == WindMode.MANUAL) {

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun WinspeedLogo(modifier: Modifier = Modifier) {
     val logoColor = MaterialTheme.colorScheme.onBackground
-    Canvas(modifier = modifier.size(200.dp)) {
+    Canvas(modifier = modifier) {
         val scale = size.width / 200f
         
         // Background Rect removed to support transparency as per latest SVG style
