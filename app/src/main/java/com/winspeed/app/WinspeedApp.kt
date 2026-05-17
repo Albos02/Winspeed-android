@@ -44,7 +44,8 @@ fun WinspeedApp(
     settingsDataStore: SettingsDataStore,
     sessions: List<com.winspeed.app.database.entities.SailingSession> = emptyList(),
     onKioskModeChange: (Boolean) -> Unit = {},
-onRecordingStart: () -> Unit = {},
+    onWakeLockChange: (Boolean) -> Unit = {},
+    onRecordingStart: () -> Unit = {},
     onRecordingStop: (Float?) -> Unit = {},
     onRecordingPause: () -> Unit = {},
     onRecordingResume: () -> Unit = {},
@@ -74,6 +75,7 @@ onRecordingStart: () -> Unit = {},
 
     LaunchedEffect(recording) {
         onKioskModeChange(recording)
+        onWakeLockChange(recording)
     }
 
     val windEstimator = remember { WindEstimator() }

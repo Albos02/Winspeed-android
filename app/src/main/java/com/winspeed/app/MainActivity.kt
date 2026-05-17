@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -102,6 +103,13 @@ class MainActivity : ComponentActivity() {
                 sessions = sessionList,
                 onKioskModeChange = { enabled ->
                     if (enabled) enableKioskMode() else disableKioskMode()
+                },
+                onWakeLockChange = { enabled ->
+                    if (enabled) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
                 },
                 onRecordingStart = {
                     val intent = Intent(this, RecordingService::class.java).apply {

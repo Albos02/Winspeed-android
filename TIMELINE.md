@@ -45,7 +45,7 @@ This timeline is adapted from the PWA roadmap to reflect the current state of th
 - **Checkpoint:** User can record a track and export it to Strava/Google Earth.
 
 ## Phase 6: Optimization & Maintenance
-- [ ] Screen Wake Lock implementation (keep screen on while recording)
+- [x] Screen Wake Lock implementation (keep screen on while recording)
 - [ ] Battery optimization for long sessions
 - [ ] Refine landscape mode UI for all 5 layout variants
 - [ ] Add multiple unit support (Knots, km/h, m/s)
