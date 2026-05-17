@@ -71,6 +71,7 @@ fun WinspeedApp(
     val savedWindMode by settingsDataStore.windModeFlow.collectAsState(initial = WindMode.MANUAL)
     val savedSpeedUnit by settingsDataStore.speedUnitFlow.collectAsState(initial = SpeedUnit.KNOTS)
     val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
+    val savedDashboardTextScale by settingsDataStore.dashboardTextScaleFlow.collectAsState(initial = 1.0f)
     val savedRecording by settingsDataStore.recordingFlow.collectAsState(initial = false)
 
     var theme by remember { mutableStateOf(Theme.LIGHT) }
@@ -78,6 +79,7 @@ fun WinspeedApp(
     var windMode by remember { mutableStateOf(WindMode.MANUAL) }
     var speedUnit by remember { mutableStateOf(SpeedUnit.KNOTS) }
     var manualWindDirection by remember { mutableStateOf(0f) }
+    var dashboardTextScale by remember { mutableFloatStateOf(1.0f) }
     var recording by remember { mutableStateOf(false) }
     var appScreen by remember { mutableStateOf(AppScreen.SETTINGS) }
 
@@ -86,6 +88,7 @@ fun WinspeedApp(
     LaunchedEffect(savedWindMode) { windMode = savedWindMode }
     LaunchedEffect(savedSpeedUnit) { speedUnit = savedSpeedUnit }
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
+    LaunchedEffect(savedDashboardTextScale) { dashboardTextScale = savedDashboardTextScale }
     LaunchedEffect(savedRecording) { recording = savedRecording }
 
     LaunchedEffect(recording) {
@@ -142,6 +145,7 @@ fun WinspeedApp(
                         theme = theme,
                         layout = layout,
                         speedUnit = speedUnit,
+                        dashboardTextScale = dashboardTextScale,
                         windDirection = manualWindDirection,
                         windMode = windMode,
                         sessions = sessions,
@@ -157,6 +161,10 @@ fun WinspeedApp(
                         onSpeedUnitChange = {
                             speedUnit = it
                             coroutineScope.launch { settingsDataStore.saveSpeedUnit(it) }
+                        },
+                        onDashboardTextScaleChange = {
+                            dashboardTextScale = it
+                            coroutineScope.launch { settingsDataStore.saveDashboardTextScale(it) }
                         },
                         onWindChange = { 
                             manualWindDirection = it
@@ -190,6 +198,7 @@ fun WinspeedApp(
                     layout = layout,
                     speed = speedKnots,
                     speedUnit = speedUnit,
+                    textScale = dashboardTextScale,
                     heading = headingDegrees,
                     vmg = vmg,
                     windDirection = currentWind,
@@ -211,6 +220,7 @@ fun SettingsScreen(
     theme: Theme,
     layout: LayoutMode,
     speedUnit: SpeedUnit,
+    dashboardTextScale: Float,
     windDirection: Float,
     windMode: WindMode,
     sessions: List<com.winspeed.app.database.entities.SailingSession>,
@@ -218,6 +228,7 @@ fun SettingsScreen(
     onThemeChange: (Theme) -> Unit,
     onLayoutChange: (LayoutMode) -> Unit,
     onSpeedUnitChange: (SpeedUnit) -> Unit,
+    onDashboardTextScaleChange: (Float) -> Unit,
     onWindChange: (Float) -> Unit,
     onWindModeChange: (WindMode) -> Unit,
     onStart: () -> Unit,
@@ -293,6 +304,16 @@ fun SettingsScreen(
             Text("Wind: ${windMode.name}")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Data Text Scale: ${"%.1f".format(dashboardTextScale)}x", color = textColor)
+        Slider(
+            value = dashboardTextScale,
+            onValueChange = onDashboardTextScaleChange,
+            valueRange = 0.5f..2.0f,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+
         if (windMode == WindMode.MANUAL) {
             Text("Manual Wind: ${windDirection.toInt()}°", color = textColor)
             Slider(
@@ -334,6 +355,7 @@ fun DashboardScreen(
     layout: LayoutMode,
     speed: Float,
     speedUnit: SpeedUnit,
+    textScale: Float,
     heading: Float,
     vmg: Float,
     windDirection: Float,
@@ -396,13 +418,14 @@ fun DashboardScreen(
         LayoutMode.SIX_S -> 1
     }
 
-    val valueFontSize = when (layout) {
-        LayoutMode.TWO_S -> 160.sp
-        LayoutMode.FOUR_Q -> 85.sp
-        LayoutMode.FOUR_S -> 140.sp
-        LayoutMode.SIX_Q -> 80.sp
-        LayoutMode.SIX_S -> 90.sp
+    val baseFontSize = when (layout) {
+        LayoutMode.TWO_S -> 160f
+        LayoutMode.FOUR_Q -> 85f
+        LayoutMode.FOUR_S -> 140f
+        LayoutMode.SIX_Q -> 80f
+        LayoutMode.SIX_S -> 90f
     }
+    val valueFontSize = (baseFontSize * textScale).sp
 
     Box(modifier = Modifier.fillMaxSize().padding(2.dp)) {
         Column(modifier = Modifier.fillMaxSize()) {

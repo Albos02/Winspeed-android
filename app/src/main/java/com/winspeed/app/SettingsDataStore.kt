@@ -19,6 +19,7 @@ class SettingsDataStore(private val context: Context) {
         val WIND_MODE_KEY = stringPreferencesKey("wind_mode")
         val SPEED_UNIT_KEY = stringPreferencesKey("speed_unit")
         val MANUAL_WIND_DIRECTION_KEY = floatPreferencesKey("manual_wind_direction")
+        val DASHBOARD_TEXT_SCALE_KEY = floatPreferencesKey("dashboard_text_scale")
         val RECORDING_KEY = booleanPreferencesKey("recording")
         val PAUSED_KEY = booleanPreferencesKey("paused")
         val SESSION_ID_KEY = longPreferencesKey("session_id")
@@ -46,6 +47,10 @@ class SettingsDataStore(private val context: Context) {
 
     val manualWindDirectionFlow: Flow<Float> = context.dataStore.data.map { preferences ->
         preferences[MANUAL_WIND_DIRECTION_KEY] ?: 0f
+    }
+
+    val dashboardTextScaleFlow: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[DASHBOARD_TEXT_SCALE_KEY] ?: 1.0f
     }
 
     val recordingFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -87,6 +92,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveManualWindDirection(direction: Float) {
         context.dataStore.edit { preferences ->
             preferences[MANUAL_WIND_DIRECTION_KEY] = direction
+        }
+    }
+
+    suspend fun saveDashboardTextScale(scale: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[DASHBOARD_TEXT_SCALE_KEY] = scale
         }
     }
 
