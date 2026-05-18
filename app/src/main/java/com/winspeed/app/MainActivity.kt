@@ -3,6 +3,7 @@ package com.winspeed.app
 import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -154,6 +155,13 @@ class MainActivity : ComponentActivity() {
                             startService(intent)
                         }
                         pendingResumeSessionId = null
+                    }
+                },
+                onOrientationChange = { orientation ->
+                    requestedOrientation = when (orientation) {
+                        AppOrientation.AUTO -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        AppOrientation.PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        AppOrientation.LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     }
                 },
                 onExport = { sessionId, format, downloadOnly ->

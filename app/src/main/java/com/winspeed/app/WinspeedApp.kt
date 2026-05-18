@@ -19,6 +19,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 
 import com.winspeed.app.database.entities.SailingSession
 import com.winspeed.app.ui.theme.WinspeedTheme
@@ -47,6 +49,7 @@ enum class SpeedUnit {
             MS -> "m/s"
         }
 }
+enum class AppOrientation { AUTO, PORTRAIT, LANDSCAPE }
 enum class AppScreen { SETTINGS, DASHBOARD, SESSIONS }
 
 @Composable
@@ -62,6 +65,7 @@ fun WinspeedApp(
     onRecordingPause: () -> Unit = {},
     onRecordingResume: () -> Unit = {},
     onResumeSession: () -> Unit = {},
+    onOrientationChange: (AppOrientation) -> Unit = {},
     onExport: (Long, String, Boolean) -> Unit = { _, _, _ -> }
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -72,6 +76,7 @@ fun WinspeedApp(
     val savedSpeedUnit by settingsDataStore.speedUnitFlow.collectAsState(initial = SpeedUnit.KNOTS)
     val savedManualWindDirection by settingsDataStore.manualWindDirectionFlow.collectAsState(initial = 0f)
     val savedDashboardTextScale by settingsDataStore.dashboardTextScaleFlow.collectAsState(initial = 1.0f)
+    val savedOrientation by settingsDataStore.orientationFlow.collectAsState(initial = AppOrientation.AUTO)
     val savedRecording by settingsDataStore.recordingFlow.collectAsState(initial = false)
 
     var theme by remember { mutableStateOf(Theme.LIGHT) }
@@ -80,6 +85,7 @@ fun WinspeedApp(
     var speedUnit by remember { mutableStateOf(SpeedUnit.KNOTS) }
     var manualWindDirection by remember { mutableStateOf(0f) }
     var dashboardTextScale by remember { mutableFloatStateOf(1.0f) }
+    var orientation by remember { mutableStateOf(AppOrientation.AUTO) }
     var recording by remember { mutableStateOf(false) }
     var appScreen by remember { mutableStateOf(AppScreen.SETTINGS) }
 
@@ -89,11 +95,18 @@ fun WinspeedApp(
     LaunchedEffect(savedSpeedUnit) { speedUnit = savedSpeedUnit }
     LaunchedEffect(savedManualWindDirection) { manualWindDirection = savedManualWindDirection }
     LaunchedEffect(savedDashboardTextScale) { dashboardTextScale = savedDashboardTextScale }
+    LaunchedEffect(savedOrientation) { orientation = savedOrientation }
     LaunchedEffect(savedRecording) { recording = savedRecording }
 
-    LaunchedEffect(recording) {
+    LaunchedEffect(recording, orientation) {
         onKioskModeChange(recording)
         onWakeLockChange(recording)
+        val targetOrientation = if (recording && orientation == AppOrientation.AUTO) {
+            AppOrientation.LANDSCAPE
+        } else {
+            orientation
+        }
+        onOrientationChange(targetOrientation)
     }
 
     val windEstimator = remember { WindEstimator() }
@@ -146,6 +159,7 @@ fun WinspeedApp(
                         layout = layout,
                         speedUnit = speedUnit,
                         dashboardTextScale = dashboardTextScale,
+                        orientation = orientation,
                         windDirection = manualWindDirection,
                         windMode = windMode,
                         sessions = sessions,
@@ -165,6 +179,10 @@ fun WinspeedApp(
                         onDashboardTextScaleChange = {
                             dashboardTextScale = it
                             coroutineScope.launch { settingsDataStore.saveDashboardTextScale(it) }
+                        },
+                        onOrientationChange = {
+                            orientation = it
+                            coroutineScope.launch { settingsDataStore.saveOrientation(it) }
                         },
                         onWindChange = { 
                             manualWindDirection = it
@@ -221,6 +239,7 @@ fun SettingsScreen(
     layout: LayoutMode,
     speedUnit: SpeedUnit,
     dashboardTextScale: Float,
+    orientation: AppOrientation,
     windDirection: Float,
     windMode: WindMode,
     sessions: List<com.winspeed.app.database.entities.SailingSession>,
@@ -229,6 +248,7 @@ fun SettingsScreen(
     onLayoutChange: (LayoutMode) -> Unit,
     onSpeedUnitChange: (SpeedUnit) -> Unit,
     onDashboardTextScaleChange: (Float) -> Unit,
+    onOrientationChange: (AppOrientation) -> Unit,
     onWindChange: (Float) -> Unit,
     onWindModeChange: (WindMode) -> Unit,
     onStart: () -> Unit,
@@ -303,6 +323,21 @@ fun SettingsScreen(
             Text("Wind: ${windMode.name}")
         }
 
+        OutlinedButton(
+            onClick = {
+                onOrientationChange(
+                    when (orientation) {
+                        AppOrientation.AUTO -> AppOrientation.PORTRAIT
+                        AppOrientation.PORTRAIT -> AppOrientation.LANDSCAPE
+                        AppOrientation.LANDSCAPE -> AppOrientation.AUTO
+                    }
+                )
+            },
+            modifier = Modifier.offset(y = (-40).dp).padding(4.dp).fillMaxWidth(0.7f)
+        ) {
+            Text("Orientation: ${orientation.name}")
+        }
+
         if (windMode == WindMode.MANUAL) {
             Text("Manual Wind: ${windDirection.toInt()}°", color = textColor, fontSize = 14.sp, modifier = Modifier.offset(y = (-35).dp))
             Slider(
@@ -364,6 +399,8 @@ fun DashboardScreen(
 
     var lastExitClickTime by remember { mutableLongStateOf(0L) }
     
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    
     val convertedSpeed = when (speedUnit) {
         SpeedUnit.KNOTS -> speed
         SpeedUnit.KMH -> speed * 1.852f
@@ -398,27 +435,27 @@ fun DashboardScreen(
     }
 
     val rows = when (layout) {
-        LayoutMode.TWO_S -> 2
+        LayoutMode.TWO_S -> if (isLandscape) 1 else 2
         LayoutMode.FOUR_Q -> 2
-        LayoutMode.FOUR_S -> 4
-        LayoutMode.SIX_Q -> 3
-        LayoutMode.SIX_S -> 6
+        LayoutMode.FOUR_S -> if (isLandscape) 2 else 4
+        LayoutMode.SIX_Q -> if (isLandscape) 2 else 3
+        LayoutMode.SIX_S -> if (isLandscape) 2 else 6
     }
 
     val cols = when (layout) {
-        LayoutMode.TWO_S -> 1
+        LayoutMode.TWO_S -> if (isLandscape) 2 else 1
         LayoutMode.FOUR_Q -> 2
-        LayoutMode.FOUR_S -> 1
-        LayoutMode.SIX_Q -> 2
-        LayoutMode.SIX_S -> 1
+        LayoutMode.FOUR_S -> if (isLandscape) 2 else 1
+        LayoutMode.SIX_Q -> if (isLandscape) 3 else 2
+        LayoutMode.SIX_S -> if (isLandscape) 3 else 1
     }
 
     val baseFontSize = when (layout) {
-        LayoutMode.TWO_S -> 160f
+        LayoutMode.TWO_S -> if (isLandscape) 140f else 160f
         LayoutMode.FOUR_Q -> 85f
-        LayoutMode.FOUR_S -> 140f
-        LayoutMode.SIX_Q -> 80f
-        LayoutMode.SIX_S -> 90f
+        LayoutMode.FOUR_S -> if (isLandscape) 85f else 140f
+        LayoutMode.SIX_Q -> if (isLandscape) 70f else 80f
+        LayoutMode.SIX_S -> if (isLandscape) 70f else 90f
     }
     val valueFontSize = (baseFontSize * textScale).sp
 

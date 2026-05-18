@@ -18,6 +18,7 @@ class SettingsDataStore(private val context: Context) {
         val LAYOUT_MODE_KEY = stringPreferencesKey("layout_mode")
         val WIND_MODE_KEY = stringPreferencesKey("wind_mode")
         val SPEED_UNIT_KEY = stringPreferencesKey("speed_unit")
+        val ORIENTATION_KEY = stringPreferencesKey("orientation")
         val MANUAL_WIND_DIRECTION_KEY = floatPreferencesKey("manual_wind_direction")
         val DASHBOARD_TEXT_SCALE_KEY = floatPreferencesKey("dashboard_text_scale")
         val RECORDING_KEY = booleanPreferencesKey("recording")
@@ -43,6 +44,11 @@ class SettingsDataStore(private val context: Context) {
     val speedUnitFlow: Flow<SpeedUnit> = context.dataStore.data.map { preferences ->
         val unitName = preferences[SPEED_UNIT_KEY] ?: SpeedUnit.KNOTS.name
         try { SpeedUnit.valueOf(unitName) } catch (e: Exception) { SpeedUnit.KNOTS }
+    }
+
+    val orientationFlow: Flow<AppOrientation> = context.dataStore.data.map { preferences ->
+        val orientationName = preferences[ORIENTATION_KEY] ?: AppOrientation.AUTO.name
+        try { AppOrientation.valueOf(orientationName) } catch (e: Exception) { AppOrientation.AUTO }
     }
 
     val manualWindDirectionFlow: Flow<Float> = context.dataStore.data.map { preferences ->
@@ -86,6 +92,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveSpeedUnit(speedUnit: SpeedUnit) {
         context.dataStore.edit { preferences ->
             preferences[SPEED_UNIT_KEY] = speedUnit.name
+        }
+    }
+
+    suspend fun saveOrientation(orientation: AppOrientation) {
+        context.dataStore.edit { preferences ->
+            preferences[ORIENTATION_KEY] = orientation.name
         }
     }
 
